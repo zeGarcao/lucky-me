@@ -20,7 +20,7 @@ contract TwabController is ITwabController, Ownable {
         PERIOD_OFFSET = _periodOffset;
     }
 
-    function increaseBalance(address _account, uint256 _amount) external returns (uint256) {
+    function increaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _increaseBalance(accounts[_account], _amount);
 
@@ -32,7 +32,7 @@ contract TwabController is ITwabController, Ownable {
         return newBalance;
     }
 
-    function decreaseBalance(address _account, uint256 _amount) external returns (uint256) {
+    function decreaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _decreaseBalance(accounts[_account], _amount);
 
