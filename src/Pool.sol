@@ -6,22 +6,19 @@ import {TwabController} from "./TwabController.sol";
 import {IAavePool} from "./interfaces/IAavePool.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {DEPOSIT__INVALID_AMOUNT, WITHDRAW__INVALID_AMOUNT, WITHDRAW__INVALID_BALANCE} from "./utils/Errors.sol";
+import {Deposited, Withdrawn} from "./utils/Events.sol";
+import {MIN_DEPOSIT} from "./utils/Constants.sol";
 
 contract Pool is IPool {
-    error DEPOSIT__INVALID_AMOUNT();
-    error WITHDRAW__INVALID_AMOUNT();
-    error WITHDRAW__INVALID_BALANCE();
-
-    event Deposited(address indexed account, uint256 amount, uint256 balance, uint256 timestamp);
-    event Withdrawn(address indexed account, uint256 amount, uint256 balance, uint256 timestamp);
-
-    uint256 public constant MIN_DEPOSIT = 10e6;
-    IAavePool public constant AAVE_POOL = IAavePool(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2);
-    IERC20 public constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-
+    IAavePool public immutable AAVE_POOL;
+    IERC20 public immutable USDC;
     TwabController public immutable twabController;
 
-    constructor(uint256 _startTime) {
+    constructor(address _usdcAddress, address _aavePoolAddress, uint256 _startTime) {
+        // @todo check inputs
+        AAVE_POOL = IAavePool(_aavePoolAddress);
+        USDC = IERC20(_usdcAddress);
         twabController = new TwabController(_startTime);
     }
 
