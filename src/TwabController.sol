@@ -4,29 +4,13 @@ pragma solidity ^0.8.27;
 import {ITwabController} from "./interfaces/ITwabController.sol";
 import {RingBufferLib} from "./libraries/RingBufferLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/Events.sol";
+import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
+import {Observation, Account} from "./utils/Structs.sol";
+import {DECREASE_BALANCE__INSUFFICIENT_BALANCE} from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
-    event BalanceIncreased(address indexed user, uint256 amount, uint256 balance);
-    event BalanceDecreased(address indexed user, uint256 amount, uint256 balance);
-    event ObservationRecorded(address indexed user, Observation observation, bool isNew);
-
-    uint256 public constant MAX_CARDINALITY = 17520;
-    uint256 public constant PERIOD_LENGTH = 1 hours;
-
     uint256 public immutable PERIOD_OFFSET;
-
-    struct Observation {
-        uint256 balance;
-        uint256 cumulativeBalance;
-        uint256 timestamp;
-    }
-
-    struct Account {
-        uint256 balance;
-        uint256 nextObservationIndex;
-        uint256 cardinality;
-        Observation[MAX_CARDINALITY] observations;
-    }
 
     mapping(address => Account) public accounts;
     Account public totalSupplyAccount;
@@ -37,41 +21,50 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function increaseBalance(address _account, uint256 _amount) external returns (uint256) {
-        Account storage account = accounts[_account];
-        uint256 newBalance = account.balance + _amount;
-        account.balance = newBalance;
-        (Observation memory observation, bool isNew) = _recordObservation(account);
+        (uint256 newBalance, Observation memory observation, bool isNewObservation) =
+            _increaseBalance(accounts[_account], _amount);
 
-        _increaseTotalSupply(_amount);
+        _increaseBalance(totalSupplyAccount, _amount);
 
-        emit BalanceIncreased(_account, _amount, newBalance);
-        emit ObservationRecorded(_account, observation, isNew);
+        emit BalanceIncreased(_account, _amount, newBalance, block.timestamp);
+        emit ObservationRecorded(_account, observation, isNewObservation);
 
         return newBalance;
     }
 
     function decreaseBalance(address _account, uint256 _amount) external returns (uint256) {
-        Account storage account = accounts[_account];
-        uint256 newBalance = account.balance - _amount;
-        account.balance = newBalance;
-        (Observation memory observation, bool isNew) = _recordObservation(account);
+        (uint256 newBalance, Observation memory observation, bool isNewObservation) =
+            _decreaseBalance(accounts[_account], _amount);
 
-        _decreaseTotalSupply(_amount);
+        _decreaseBalance(totalSupplyAccount, _amount);
 
-        emit BalanceDecreased(_account, _amount, newBalance);
-        emit ObservationRecorded(_account, observation, isNew);
+        emit BalanceDecreased(_account, _amount, newBalance, block.timestamp);
+        emit ObservationRecorded(_account, observation, isNewObservation);
 
         return newBalance;
     }
 
-    function _increaseTotalSupply(uint256 _amount) internal {
-        totalSupplyAccount.balance += _amount;
-        _recordObservation(totalSupplyAccount);
+    function _increaseBalance(Account storage _account, uint256 _amount)
+        internal
+        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
+    {
+        newBalance = _account.balance + _amount;
+        _account.balance = newBalance;
+
+        (observation, isNewObservation) = _recordObservation(_account);
     }
 
-    function _decreaseTotalSupply(uint256 _amount) internal {
-        totalSupplyAccount.balance -= _amount;
-        _recordObservation(totalSupplyAccount);
+    function _decreaseBalance(Account storage _account, uint256 _amount)
+        internal
+        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
+    {
+        uint256 currentBalance = _account.balance;
+        require(_amount <= currentBalance, DECREASE_BALANCE__INSUFFICIENT_BALANCE());
+
+        newBalance = currentBalance - _amount;
+        _account.balance = newBalance;
+
+        (observation, isNewObservation) = _recordObservation(_account);
     }
 
     function _recordObservation(Account storage _account)
@@ -79,16 +72,19 @@ contract TwabController is ITwabController, Ownable {
         returns (Observation memory observation, bool isNew)
     {
         uint256 currentPeriod = _getPeriod(block.timestamp);
+
         uint256 lastObservationIndex = RingBufferLib.newestIndex(_account.nextObservationIndex, MAX_CARDINALITY);
         uint256 nextIndex = lastObservationIndex;
         Observation memory lastObservation = _account.observations[lastObservationIndex];
         uint256 lastPeriod = _getPeriod(lastObservation.timestamp);
-        isNew = _account.cardinality == 0 || currentPeriod > lastPeriod;
 
-        if (_account.cardinality == 0 || currentPeriod > lastPeriod) {
+        uint256 cardinality = _account.cardinality;
+        isNew = cardinality == 0 || currentPeriod > lastPeriod;
+
+        if (isNew) {
             nextIndex = _account.nextObservationIndex;
             _account.nextObservationIndex = RingBufferLib.nextIndex(lastObservationIndex, MAX_CARDINALITY);
-            _account.cardinality = _account.cardinality < MAX_CARDINALITY ? _account.cardinality + 1 : MAX_CARDINALITY;
+            _account.cardinality = cardinality < MAX_CARDINALITY ? cardinality + 1 : MAX_CARDINALITY;
         }
 
         observation = Observation({
