@@ -2,61 +2,51 @@
 pragma solidity ^0.8.27;
 
 import {IPool} from "./interfaces/IPool.sol";
+import {TwabController} from "./TwabController.sol";
+import {IAavePool} from "./interfaces/IAavePool.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Pool is IPool {
-    using SafeERC20 for IERC20;
+    error DEPOSIT__INVALID_AMOUNT();
+    error WITHDRAW__INVALID_AMOUNT();
+    error WITHDRAW__INVALID_BALANCE();
+
+    event Deposited(address indexed account, uint256 amount, uint256 balance, uint256 timestamp);
+    event Withdrawn(address indexed account, uint256 amount, uint256 balance, uint256 timestamp);
 
     uint256 public constant MIN_DEPOSIT = 10e6;
-    uint256 public immutable PERIOD_OFFSET;
-    uint256 public immutable PERIOD_LENGTH;
+    IAavePool public constant AAVE_POOL = IAavePool(0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2);
     IERC20 public constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
 
-    struct Observation {
-        uint256 cumulativeBalance;
-        uint256 balance;
-        uint256 timestamp;
-    }
+    TwabController public immutable twabController;
 
-    struct Account {
-        uint256 balance;
-        uint256 nextObservationIndex;
-        uint256 cardinality;
-        Observation[17520] observations;
-    }
-
-    error INVALID_AMOUNT();
-
-    mapping(address => Account) public accounts;
-
-    constructor(uint256 _periodOffset, uint256 _periodLength) {
-        PERIOD_OFFSET = _periodOffset;
-        PERIOD_LENGTH = _periodLength;
+    constructor(uint256 _startTime) {
+        twabController = new TwabController(_startTime);
     }
 
     function deposit(uint256 _amount) external {
-        /**
-         * Checks:
-         *     - check min deposit
-         * Effects:
-         *     - register observation
-         *     - update account details
-         * Interactions:
-         *     - transfer the tokens to this contract
-         *     - supply to Aave
-         * Events:
-         *     - emit BalanceIncreased event
-         */
-        require(_amount >= MIN_DEPOSIT, INVALID_AMOUNT());
+        require(_amount >= MIN_DEPOSIT, DEPOSIT__INVALID_AMOUNT());
 
-        Account storage account = accounts[msg.sender];
-        account.balance += _amount;
+        uint256 newBalance = twabController.increaseBalance(msg.sender, _amount);
 
-        uint256 currentPeriod = (block.timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
+        USDC.transferFrom(msg.sender, address(this), _amount);
+
+        uint256 poolBalance = USDC.balanceOf(address(this));
+        USDC.approve(address(AAVE_POOL), poolBalance);
+        AAVE_POOL.supply(address(USDC), poolBalance, address(this), 0);
+
+        emit Deposited(msg.sender, _amount, newBalance, block.timestamp);
     }
 
-    function withdraw(uint256 _amount) external {}
+    function withdraw(uint256 _amount) external {
+        require(_amount != 0, WITHDRAW__INVALID_AMOUNT());
 
-    function claimPrize() external {}
+        uint256 newBalance = twabController.decreaseBalance(msg.sender, _amount);
+        require(newBalance >= MIN_DEPOSIT || newBalance == 0, WITHDRAW__INVALID_BALANCE());
+
+        AAVE_POOL.withdraw(address(USDC), _amount, msg.sender);
+
+        emit Withdrawn(msg.sender, _amount, newBalance, block.timestamp);
+    }
 }
