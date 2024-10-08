@@ -7,7 +7,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
 import {Observation, AccountDetails} from "./utils/Structs.sol";
-import {DECREASE_BALANCE__INSUFFICIENT_BALANCE} from "./utils/Errors.sol";
+import {DECREASE_BALANCE__INSUFFICIENT_BALANCE, INCREASE_BALANCE__INVALID_AMOUNT} from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
     uint256 public immutable PERIOD_OFFSET;
@@ -21,6 +21,8 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function increaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
+        require(_amount != 0, INCREASE_BALANCE__INVALID_AMOUNT());
+
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _increaseBalance(accounts[_account], _amount);
 
@@ -33,6 +35,9 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function decreaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
+        AccountDetails storage account = accounts[_account];
+        require(_amount <= account.balance, DECREASE_BALANCE__INSUFFICIENT_BALANCE());
+
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _decreaseBalance(accounts[_account], _amount);
 
@@ -58,10 +63,7 @@ contract TwabController is ITwabController, Ownable {
         internal
         returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
     {
-        uint256 currentBalance = _account.balance;
-        require(_amount <= currentBalance, DECREASE_BALANCE__INSUFFICIENT_BALANCE());
-
-        newBalance = currentBalance - _amount;
+        newBalance = _account.balance - _amount;
         _account.balance = newBalance;
 
         (observation, isNewObservation) = _recordObservation(_account);
