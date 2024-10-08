@@ -6,14 +6,14 @@ import {RingBufferLib} from "./libraries/RingBufferLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
-import {Observation, Account} from "./utils/Structs.sol";
+import {Observation, AccountDetails} from "./utils/Structs.sol";
 import {DECREASE_BALANCE__INSUFFICIENT_BALANCE} from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
     uint256 public immutable PERIOD_OFFSET;
 
-    mapping(address => Account) public accounts;
-    Account public totalSupplyAccount;
+    mapping(address => AccountDetails) public accounts;
+    AccountDetails public totalSupplyAccount;
 
     constructor(uint256 _periodOffset) Ownable(msg.sender) {
         // @todo do checks on _periodOffset arg
@@ -44,7 +44,7 @@ contract TwabController is ITwabController, Ownable {
         return newBalance;
     }
 
-    function _increaseBalance(Account storage _account, uint256 _amount)
+    function _increaseBalance(AccountDetails storage _account, uint256 _amount)
         internal
         returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
     {
@@ -54,7 +54,7 @@ contract TwabController is ITwabController, Ownable {
         (observation, isNewObservation) = _recordObservation(_account);
     }
 
-    function _decreaseBalance(Account storage _account, uint256 _amount)
+    function _decreaseBalance(AccountDetails storage _account, uint256 _amount)
         internal
         returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
     {
@@ -67,7 +67,7 @@ contract TwabController is ITwabController, Ownable {
         (observation, isNewObservation) = _recordObservation(_account);
     }
 
-    function _recordObservation(Account storage _account)
+    function _recordObservation(AccountDetails storage _account)
         internal
         returns (Observation memory observation, bool isNew)
     {

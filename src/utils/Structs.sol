@@ -9,7 +9,7 @@ struct Observation {
     uint256 timestamp;
 }
 
-struct Account {
+struct AccountDetails {
     uint256 balance;
     uint256 nextObservationIndex;
     uint256 cardinality;
