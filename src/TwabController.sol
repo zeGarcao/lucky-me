@@ -98,6 +98,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _getPeriod(uint256 timestamp) internal view returns (uint256) {
+        if (timestamp < PERIOD_OFFSET) return 0;
         return (timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
     }
 }
