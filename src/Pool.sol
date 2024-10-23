@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {IPool} from "./interfaces/IPool.sol";
-import {TwabController} from "./TwabController.sol";
-import {IAavePool} from "./interfaces/IAavePool.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {DEPOSIT__INVALID_AMOUNT, WITHDRAW__INVALID_AMOUNT, WITHDRAW__INVALID_BALANCE} from "./utils/Errors.sol";
-import {Deposited, Withdrawn} from "./utils/Events.sol";
-import {MIN_DEPOSIT} from "./utils/Constants.sol";
+
+import {IPool} from "@lucky-me/interfaces/IPool.sol";
+import {TwabController} from "@lucky-me/TwabController.sol";
+import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
+import {
+    DEPOSIT__INVALID_AMOUNT,
+    WITHDRAW__INVALID_AMOUNT,
+    WITHDRAW__INVALID_BALANCE,
+    INVALID_ADDRESS
+} from "@lucky-me/utils/Errors.sol";
+import {Deposited, Withdrawn} from "@lucky-me/utils/Events.sol";
+import {MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
 
 contract Pool is IPool {
     IAavePool public immutable AAVE_POOL;
@@ -16,7 +21,8 @@ contract Pool is IPool {
     TwabController public immutable twabController;
 
     constructor(address _usdcAddress, address _aavePoolAddress, uint256 _startTime) {
-        // @todo check inputs
+        require(_usdcAddress != address(0) && _aavePoolAddress != address(0), INVALID_ADDRESS());
+
         AAVE_POOL = IAavePool(_aavePoolAddress);
         USDC = IERC20(_usdcAddress);
         twabController = new TwabController(_startTime);
