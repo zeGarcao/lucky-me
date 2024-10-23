@@ -7,7 +7,11 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
 import {Observation, AccountDetails} from "./utils/Structs.sol";
-import {DECREASE_BALANCE__INSUFFICIENT_BALANCE, INCREASE_BALANCE__INVALID_AMOUNT} from "./utils/Errors.sol";
+import {
+    DECREASE_BALANCE__INSUFFICIENT_BALANCE,
+    INCREASE_BALANCE__INVALID_AMOUNT,
+    TWAB__INVALID_PERIOD_OFFSET
+} from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
     uint256 public immutable PERIOD_OFFSET;
@@ -16,7 +20,7 @@ contract TwabController is ITwabController, Ownable {
     AccountDetails public totalSupplyAccount;
 
     constructor(uint256 _periodOffset) Ownable(msg.sender) {
-        // @todo do checks on _periodOffset arg
+        require(_periodOffset >= block.timestamp, TWAB__INVALID_PERIOD_OFFSET());
         PERIOD_OFFSET = _periodOffset;
     }
 
