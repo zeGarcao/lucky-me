@@ -7,6 +7,8 @@ import {WITHDRAW__INVALID_AMOUNT, WITHDRAW__INVALID_BALANCE} from "@lucky-me/uti
 import {Withdrawn} from "@lucky-me/utils/Events.sol";
 
 contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
+    // ================================== SETUP MODIFIERS ==================================
+
     modifier whenWithdrawAmountIsZero() {
         withdrawAmount = 0;
         _;
@@ -38,7 +40,10 @@ contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         _;
     }
 
+    // =================================== UNHAPPY TESTS ===================================
+
     function test_RevertWhen_WithdrawAmountIsZero() public whenWithdrawAmountIsZero {
+        // Expect revert with `WITHDRAW__INVALID_AMOUNT` error
         vm.expectRevert(WITHDRAW__INVALID_AMOUNT.selector);
         pool.withdraw(withdrawAmount);
     }
@@ -48,28 +53,38 @@ contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenWithdrawAmountIsNotZero
         whenNewBalanceNotZeroAndBelowMin
     {
+        // Expect revert with `WITHDRAW__INVALID_BALANCE` error
         vm.expectRevert(WITHDRAW__INVALID_BALANCE.selector);
-
         vm.prank(bob);
         pool.withdraw(withdrawAmount);
     }
 
+    // ==================================== HAPPY TESTS ====================================
+
     function test_Withdraw_NewBalanceIsZero() public whenWithdrawAmountIsNotZero whenNewBalanceIsZero {
+        // Expect call to `twabController` to decrease balance
         vm.expectCall(address(twabController), abi.encodeCall(twabController.decreaseBalance, (bob, withdrawAmount)));
+        // Expect call to `aavePool` to withdraw the assets
         vm.expectCall(address(aavePool), abi.encodeCall(aavePool.withdraw, (address(usdc), withdrawAmount, bob)));
+        // Expect the `Withdrawn` event to be emitted
         vm.expectEmit(true, true, true, true);
         emit Withdrawn(bob, withdrawAmount, 0, block.timestamp);
 
+        // Withdraw the assets from the `pool`
         vm.prank(bob);
         pool.withdraw(withdrawAmount);
     }
 
     function test_Withdraw_NewBalance() public whenWithdrawAmountIsNotZero whenNewBalanceAboveMin {
+        // Expect call to `twabController` to decrease the balance
         vm.expectCall(address(twabController), abi.encodeCall(twabController.decreaseBalance, (bob, withdrawAmount)));
+        // Expect call to `aavePool` to withdraw the assets
         vm.expectCall(address(aavePool), abi.encodeCall(aavePool.withdraw, (address(usdc), withdrawAmount, bob)));
+        // Expect the `Withdrawn` event to be emitted
         vm.expectEmit(true, true, true, true);
         emit Withdrawn(bob, withdrawAmount, depositAmount - withdrawAmount, block.timestamp);
 
+        // Withdraw the assets
         vm.prank(bob);
         pool.withdraw(withdrawAmount);
     }

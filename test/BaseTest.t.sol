@@ -19,14 +19,18 @@ abstract contract BaseTest is Test {
     address bob = makeAddr("bob");
 
     function setUp() public virtual {
+        // Deploy USDC and Aave pool mocks
         usdc = new USDCMock();
         aavePool = new AavePoolMock();
 
+        // Deploy Lucky Me pool
         vm.prank(owner);
         pool = new Pool(address(usdc), address(aavePool), block.timestamp);
 
+        // Get twab controller
         twabController = TwabController(pool.twabController());
 
+        // Setup user account with USDC
         usdc.mint(bob, 1_000_000e6);
         vm.prank(bob);
         usdc.approve(address(pool), 1_000_000e6);
