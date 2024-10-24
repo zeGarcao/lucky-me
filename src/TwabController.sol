@@ -89,7 +89,7 @@ contract TwabController is ITwabController, Ownable {
 
         if (isNew) {
             nextIndex = _account.nextObservationIndex;
-            _account.nextObservationIndex = RingBufferLib.nextIndex(lastObservationIndex, MAX_CARDINALITY);
+            _account.nextObservationIndex = RingBufferLib.nextIndex(nextIndex, MAX_CARDINALITY);
             _account.cardinality = cardinality < MAX_CARDINALITY ? cardinality + 1 : MAX_CARDINALITY;
         }
 
@@ -106,5 +106,13 @@ contract TwabController is ITwabController, Ownable {
     function _getPeriod(uint256 timestamp) internal view returns (uint256) {
         if (timestamp < PERIOD_OFFSET) return 0;
         return (timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
+    }
+
+    function getAccount(address _account) public view returns (AccountDetails memory) {
+        return accounts[_account];
+    }
+
+    function getTotalSupplyAccount() public view returns (AccountDetails memory) {
+        return totalSupplyAccount;
     }
 }
