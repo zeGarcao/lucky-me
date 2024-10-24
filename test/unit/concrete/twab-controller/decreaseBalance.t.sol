@@ -3,13 +3,13 @@ pragma solidity ^0.8.27;
 
 import {TwabController_Unit_Shared_Test} from "../../shared/TwabController.t.sol";
 
-import {INCREASE_BALANCE__INVALID_AMOUNT} from "@lucky-me/utils/Errors.sol";
-import {BalanceIncreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
+import {DECREASE_BALANCE__INVALID_AMOUNT, DECREASE_BALANCE__INSUFFICIENT_BALANCE} from "@lucky-me/utils/Errors.sol";
+import {MIN_DEPOSIT, PERIOD_LENGTH, MAX_CARDINALITY} from "@lucky-me/utils/Constants.sol";
+import {BalanceDecreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
-import {MAX_CARDINALITY, PERIOD_LENGTH, MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
 import {RingBufferLib} from "@lucky-me/libraries/RingBufferLib.sol";
 
-contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
+contract DecreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     // ================================== SETUP MODIFIERS ==================================
 
     modifier whenNotOwner() {
@@ -23,16 +23,22 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     }
 
     modifier whenAmountIsZero() {
-        increaseAmount = 0;
+        decreaseAmount = 0;
         _;
     }
 
     modifier whenAmountIsNotZero() {
-        increaseAmount = MIN_DEPOSIT;
+        decreaseAmount = MIN_DEPOSIT;
         _;
     }
 
-    modifier whenCardinalityIsZero() {
+    modifier whenBalanceIsInsufficient() {
+        twabController.increaseBalance(bob, decreaseAmount - 1);
+        _;
+    }
+
+    modifier whenBalanceIsSufficient() {
+        increaseAmount = decreaseAmount * 2;
         _;
     }
 
@@ -66,63 +72,35 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     function test_RevertWhen_CallerIsNotOwner() public whenNotOwner {
         // Expect revert when caller is not the owner
         vm.expectRevert();
-        twabController.increaseBalance(bob, increaseAmount);
+        twabController.decreaseBalance(bob, decreaseAmount);
     }
 
     function test_RevertWhen_AmountIsZero() public whenOwner whenAmountIsZero {
-        // Expect revert with `INCREASE_BALANCE__INVALID_AMOUNT` error
-        vm.expectRevert(INCREASE_BALANCE__INVALID_AMOUNT.selector);
-        twabController.increaseBalance(bob, increaseAmount);
+        // Expect revert with `DECREASE_BALANCE__INVALID_AMOUNT` error
+        vm.expectRevert(DECREASE_BALANCE__INVALID_AMOUNT.selector);
+        twabController.decreaseBalance(bob, decreaseAmount);
+    }
+
+    function test_RevertWhen_InsufficientBalance() public whenOwner whenAmountIsNotZero whenBalanceIsInsufficient {
+        // Expect revert with `DECREASE_BALANCE__INSUFFICIENT_BALANCE` error
+        vm.expectRevert(DECREASE_BALANCE__INSUFFICIENT_BALANCE.selector);
+        twabController.decreaseBalance(bob, decreaseAmount);
     }
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IncreaseBalance_ZeroCardinality() public whenOwner whenAmountIsNotZero whenCardinalityIsZero {
-        // Expect the `BalanceIncreased` event to be emitted
-        vm.expectEmit(true, true, true, true);
-        emit BalanceIncreased(bob, increaseAmount, increaseAmount, block.timestamp);
-        // Expect the `ObservationRecorded` event to be emitted
-        Observation memory observation =
-            Observation({balance: increaseAmount, cumulativeBalance: 0, timestamp: block.timestamp});
-        vm.expectEmit(true, true, true, true);
-        emit ObservationRecorded(bob, observation, true);
-
-        // Increase balance
-        uint256 newBalance = twabController.increaseBalance(bob, increaseAmount);
-        // Asserting that the returning new balance is correct
-        assertEq(newBalance, increaseAmount);
-
-        // **** ACCOUNT UPDATE ****
-        AccountDetails memory account = twabController.getAccount(bob);
-
-        // Asserting that the account balance was updated
-        assertEq(account.balance, increaseAmount);
-        // Asserting that the account next observation index was updated
-        assertEq(account.nextObservationIndex, 1);
-        // Asserting that the account cardinality was updated
-        assertEq(account.cardinality, 1);
-        // Asserting that a new observation was recorded
-        uint256 accountNewestIndex = RingBufferLib.newestIndex(account.nextObservationIndex, MAX_CARDINALITY);
-        assertEq(accountNewestIndex, 0);
-        // Asserting that the new observation balance was updated
-        assertEq(account.observations[0].balance, account.balance);
-        // Asserting that the new observation cumulative balance was updated
-        assertEq(account.observations[0].cumulativeBalance, 0);
-        // Asserting that the new observation timestamp was updated
-        assertEq(account.observations[0].timestamp, block.timestamp);
-    }
-
-    function test_IncreaseBalance_NewPeriodWithCardinalityBelowMax()
+    function test_DecreaseBalance_NewPeriodWithCardinalityBelowMax()
         public
         whenOwner
         whenAmountIsNotZero
+        whenBalanceIsSufficient
         whenCardinalityBelowMax
         whenNewPeriod
     {
-        // Get user account before increase balance
+        // Get user account before decrease balance
         AccountDetails memory accountBefore = twabController.getAccount(bob);
         // Compute expected new balance
-        uint256 expectedNewBalance = accountBefore.balance + increaseAmount;
+        uint256 expectedNewBalance = accountBefore.balance - decreaseAmount;
         // Get newest observation index
         uint256 accountNewestIndexBefore =
             RingBufferLib.newestIndex(accountBefore.nextObservationIndex, MAX_CARDINALITY);
@@ -130,9 +108,9 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         uint256 expectedCumulativeBalance = accountBefore.observations[accountNewestIndexBefore].cumulativeBalance
             + accountBefore.observations[accountNewestIndexBefore].balance * skipLength;
 
-        // Expect the `BalanceIncreased` event to be emitted
+        // Expect the `BalanceDecreased` event to be emitted
         vm.expectEmit(true, true, true, true);
-        emit BalanceIncreased(bob, increaseAmount, expectedNewBalance, block.timestamp);
+        emit BalanceDecreased(bob, decreaseAmount, expectedNewBalance, block.timestamp);
 
         // Expect the `ObservationRecorded` event to be emitted
         Observation memory observation = Observation({
@@ -143,8 +121,8 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         vm.expectEmit(true, true, true, true);
         emit ObservationRecorded(bob, observation, true);
 
-        // Increase balance
-        uint256 newBalance = twabController.increaseBalance(bob, increaseAmount);
+        // Decrease balance
+        uint256 newBalance = twabController.decreaseBalance(bob, decreaseAmount);
         assertEq(newBalance, expectedNewBalance);
 
         // **** ACCOUNT UPDATE ****
@@ -167,17 +145,18 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         assertEq(accountAfter.observations[accountNewestIndexAfter].timestamp, block.timestamp);
     }
 
-    function test_IncreaseBalance_NotNewPeriodWithCardinalityBelowMax()
+    function test_DecreaseBalance_NotNewPeriodWithCardinalityBelowMax()
         public
         whenOwner
         whenAmountIsNotZero
+        whenBalanceIsSufficient
         whenCardinalityBelowMax
         whenNotNewPeriod
     {
-        // Get user account before increase balance
+        // Get user account before decrease balance
         AccountDetails memory accountBefore = twabController.getAccount(bob);
         // Compute expected new balance
-        uint256 expectedNewBalance = accountBefore.balance + increaseAmount;
+        uint256 expectedNewBalance = accountBefore.balance - decreaseAmount;
         // Get newest observation index
         uint256 accountNewestIndexBefore =
             RingBufferLib.newestIndex(accountBefore.nextObservationIndex, MAX_CARDINALITY);
@@ -185,9 +164,9 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         uint256 expectedCumulativeBalance = accountBefore.observations[accountNewestIndexBefore].cumulativeBalance
             + accountBefore.observations[accountNewestIndexBefore].balance * skipLength;
 
-        // Expect the `BalanceIncreased` event to be emitted
+        // Expect the `BalanceDecreased` event to be emitted
         vm.expectEmit(true, true, true, true);
-        emit BalanceIncreased(bob, increaseAmount, expectedNewBalance, block.timestamp);
+        emit BalanceDecreased(bob, decreaseAmount, expectedNewBalance, block.timestamp);
 
         // Expect the `ObservationRecorded` event to be emitted
         Observation memory observation = Observation({
@@ -198,8 +177,8 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         vm.expectEmit(true, true, true, true);
         emit ObservationRecorded(bob, observation, false);
 
-        // Increase balance
-        uint256 newBalance = twabController.increaseBalance(bob, increaseAmount);
+        // Decrease balance
+        uint256 newBalance = twabController.decreaseBalance(bob, decreaseAmount);
         assertEq(newBalance, expectedNewBalance);
 
         // **** ACCOUNT UPDATE ****
@@ -207,32 +186,33 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
 
         // Asserting that the account balance was updated
         assertEq(accountAfter.balance, expectedNewBalance);
-        // Asserting that the account next observation index remained the same
+        // Asserting that the account next observation remained the same
         assertEq(accountAfter.nextObservationIndex, accountBefore.nextObservationIndex);
         // Asserting that the account cardinality remained the same
         assertEq(accountAfter.cardinality, accountBefore.cardinality);
         // Asserting that the last observation was overridden
         uint256 accountNewestIndexAfter = RingBufferLib.newestIndex(accountAfter.nextObservationIndex, MAX_CARDINALITY);
         assertEq(accountNewestIndexAfter, accountNewestIndexBefore);
-        // Asserting that the overridden observation balance was updated
+        // Asserting that the new observation balance was updated
         assertEq(accountAfter.observations[accountNewestIndexAfter].balance, accountAfter.balance);
-        // Asserting that the overridden observation cumulative balance was updated
+        // Asserting that the new observation cumulative balance was updated
         assertEq(accountAfter.observations[accountNewestIndexAfter].cumulativeBalance, expectedCumulativeBalance);
-        // Asserting that the overridden observation timestamp was updated
+        // Asserting that the new observation timestamp was updated
         assertEq(accountAfter.observations[accountNewestIndexAfter].timestamp, block.timestamp);
     }
 
-    function test_IncreaseBalance_NewPeriodWithMaxCardinality()
+    function test_DecreaseBalance_NewPeriodWithMaxCardinality()
         public
         whenOwner
         whenAmountIsNotZero
+        whenBalanceIsSufficient
         whenMaxCardinality
         whenNewPeriod
     {
-        // Get user account before increase balance
+        // Get user account before decrease balance
         AccountDetails memory accountBefore = twabController.getAccount(bob);
         // Compute expected new balance
-        uint256 expectedNewBalance = accountBefore.balance + increaseAmount;
+        uint256 expectedNewBalance = accountBefore.balance - decreaseAmount;
         // Get newest observation index
         uint256 accountNewestIndexBefore =
             RingBufferLib.newestIndex(accountBefore.nextObservationIndex, MAX_CARDINALITY);
@@ -240,9 +220,9 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         uint256 expectedCumulativeBalance = accountBefore.observations[accountNewestIndexBefore].cumulativeBalance
             + accountBefore.observations[accountNewestIndexBefore].balance * skipLength;
 
-        // Expect the `BalanceIncreased` event to be emitted
+        // Expect the `BalanceDecreased` event to be emitted
         vm.expectEmit(true, true, true, true);
-        emit BalanceIncreased(bob, increaseAmount, expectedNewBalance, block.timestamp);
+        emit BalanceDecreased(bob, decreaseAmount, expectedNewBalance, block.timestamp);
 
         // Expect the `ObservationRecorded` event to be emitted
         Observation memory observation = Observation({
@@ -253,8 +233,8 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         vm.expectEmit(true, true, true, true);
         emit ObservationRecorded(bob, observation, true);
 
-        // Increase balance
-        uint256 newBalance = twabController.increaseBalance(bob, increaseAmount);
+        // Decrease balance
+        uint256 newBalance = twabController.decreaseBalance(bob, decreaseAmount);
         assertEq(newBalance, expectedNewBalance);
 
         // **** ACCOUNT UPDATE ****
