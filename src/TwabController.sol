@@ -9,6 +9,7 @@ import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
 import {Observation, AccountDetails} from "./utils/Structs.sol";
 import {
     DECREASE_BALANCE__INSUFFICIENT_BALANCE,
+    DECREASE_BALANCE__INVALID_AMOUNT,
     INCREASE_BALANCE__INVALID_AMOUNT,
     TWAB__INVALID_PERIOD_OFFSET
 } from "./utils/Errors.sol";
@@ -39,6 +40,8 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function decreaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
+        require(_amount != 0, DECREASE_BALANCE__INVALID_AMOUNT());
+
         AccountDetails storage account = accounts[_account];
         require(_amount <= account.balance, DECREASE_BALANCE__INSUFFICIENT_BALANCE());
 
