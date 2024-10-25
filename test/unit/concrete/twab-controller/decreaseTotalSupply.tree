@@ -1,0 +1,27 @@
+decreaseTotalSupply.t.sol
+├── when cardinality below {MAX_CARDINALITY}
+│   ├── when is a new period
+│   │   ├── it should decrease the total supply account balance by amount   
+│   │   ├── it should increment the total supply account nextObservationIndex by 1   
+│   │   ├── it should increment the total supply account cardinality by 1   
+│   │   ├── it should record a new {Observation} at the correct index
+│   │   ├── it should record a new {Observation} with the updated balance
+│   │   ├── it should record a new {Observation} with the updated cumulativeBalance
+│   │   └── it should record a new {Observation} with the corresponding timestamp
+│   └── when is not a new period
+│       ├── it should decrease the total supply account balance by amount   
+│       ├── it should not increment the total supply account nextObservationIndex   
+│       ├── it should not increment the total supply account cardinality
+│       ├── it should override the last {Observation}
+│       ├── it should update the last {Observation} with the updated balance
+│       ├── it should update the last {Observation} with the updated cumulativeBalance
+│       └── it should update the last {Observation} with the corresponding timestamp
+└── when cardinality reach {MAX_CARDINALITY}
+    └── when is a new period
+        ├── it should decrease the total supply account balance by amount   
+        ├── it should set the total supply account nextObservationIndex to 1
+        ├── it should not increment the total supply account cardinality  
+        ├── it should record a new {Observation} at index 0
+        ├── it should record a new {Observation} with the updated balance
+        ├── it should record a new {Observation} with the updated cumulativeBalance
+        └── it should record a new {Observation} with the corresponding timestamp
