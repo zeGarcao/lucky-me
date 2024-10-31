@@ -13,7 +13,7 @@ import {
     INCREASE_BALANCE__INVALID_AMOUNT,
     TWAB__INVALID_PERIOD_OFFSET,
     TWAB_BETWEEN__INVALID_TIME_RANGE,
-    TWAB_BETWEEN__ISUFFICIENT_HISTORY
+    TWAB_BETWEEN__INSUFFICIENT_HISTORY
 } from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
@@ -92,7 +92,7 @@ contract TwabController is ITwabController, Ownable {
         Observation memory oldestObservation = _account.observations[oldestIndex];
 
         if (oldestObservation.timestamp > _targetTime) {
-            require(_account.cardinality < MAX_CARDINALITY, TWAB_BETWEEN__ISUFFICIENT_HISTORY());
+            require(_account.cardinality < MAX_CARDINALITY, TWAB_BETWEEN__INSUFFICIENT_HISTORY());
 
             return Observation({cumulativeBalance: 0, balance: 0, timestamp: 0});
         }
