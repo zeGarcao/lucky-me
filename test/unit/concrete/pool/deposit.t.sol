@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
-import {DEPOSIT__INVALID_AMOUNT} from "@lucky-me/utils/Errors.sol";
+import {POOL_DEPOSIT__INVALID_AMOUNT} from "@lucky-me/utils/Errors.sol";
 import {Deposited} from "@lucky-me/utils/Events.sol";
 import {Pool_Unit_Shared_Test} from "../../shared/Pool.t.sol";
 
@@ -22,8 +22,8 @@ contract Deposit_Unit_Concrete_Test is Pool_Unit_Shared_Test {
     // =================================== UNHAPPY TESTS ===================================
 
     function test_RevertWhen_DepositAmountIsInvalid() public whenDepositAmountBelowMin {
-        // Expect revert with `DEPOSIT__INVALID_AMOUNT` error
-        vm.expectRevert(DEPOSIT__INVALID_AMOUNT.selector);
+        // Expect revert with `POOL_DEPOSIT__INVALID_AMOUNT` error
+        vm.expectRevert(POOL_DEPOSIT__INVALID_AMOUNT.selector);
         pool.deposit(depositAmount);
     }
 

@@ -3,10 +3,10 @@ decreaseBalance.t.sol
 │   └── it should revert
 └── when caller is the owner
     ├── when amount is zero
-    │   └── it should revert with {DECREASE_BALANCE__INVALID_AMOUNT} error
+    │   └── it should revert with {TWAB_DECREASE_BALANCE__INVALID_AMOUNT} error
     └── when amount is not zero
         ├── when balance is insufficient
-        │   └── it should revert with {DECREASE_BALANCE__INSUFFICIENT_BALANCE} error
+        │   └── it should revert with {TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE} error
         └── when balance is sufficient
             ├── when cardinality below {MAX_CARDINALITY}
             │   ├── when is a new period

@@ -23,7 +23,7 @@ getPreviousOrAtObservation.t.sol
     │       └── it should return the previous or at observation returned from binary search
     └── when account cardinality reached {MAX_CARDINALITY}
         ├── when the oldest observation timestamp is greater than the target time
-        │   └── it should revert with {TWAB_BETWEEN__INSUFFICIENT_HISTORY} error
+        │   └── it should revert with {TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY} error
         ├── when after or at observation timestamp returned from binary search is equal to the target time
         │   └── it should return the after or at observation
         └── when after or at observation timestamp returned from binary search is greater than the target time

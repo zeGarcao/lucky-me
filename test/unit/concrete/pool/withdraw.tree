@@ -1,9 +1,9 @@
 withdraw.t.sol
 ├── when withdraw amount is zero
-│   └── it should revert with {WITHDRAW__INVALID_AMOUNT} Error
+│   └── it should revert with {POOL_WITHDRAW__INVALID_AMOUNT} Error
 └── when withdraw amount is not zero
     ├── when new balance is not zero and lower than the minimum required
-    │   └── it should revert with {WITHDRAW__INVALID_BALANCE} Error
+    │   └── it should revert with {POOL_WITHDRAW__INVALID_BALANCE} Error
     ├── when new balance is zero
     │   ├── it should call the {decreaseBalance} function of the {TwabController} contract
     │   ├── it should call the {withdraw} function of the {AavePool} contract

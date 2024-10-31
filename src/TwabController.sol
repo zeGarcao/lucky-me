@@ -8,12 +8,12 @@ import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/E
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
 import {Observation, AccountDetails} from "./utils/Structs.sol";
 import {
-    DECREASE_BALANCE__INSUFFICIENT_BALANCE,
-    DECREASE_BALANCE__INVALID_AMOUNT,
-    INCREASE_BALANCE__INVALID_AMOUNT,
-    TWAB__INVALID_PERIOD_OFFSET,
-    TWAB_BETWEEN__INVALID_TIME_RANGE,
-    TWAB_BETWEEN__INSUFFICIENT_HISTORY
+    TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE,
+    TWAB_DECREASE_BALANCE__INVALID_AMOUNT,
+    TWAB_INCREASE_BALANCE__INVALID_AMOUNT,
+    TWAB_INIT__INVALID_PERIOD_OFFSET,
+    TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE,
+    TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY
 } from "./utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
@@ -23,12 +23,12 @@ contract TwabController is ITwabController, Ownable {
     AccountDetails public totalSupplyAccount;
 
     constructor(uint256 _periodOffset) Ownable(msg.sender) {
-        require(_periodOffset >= block.timestamp, TWAB__INVALID_PERIOD_OFFSET());
+        require(_periodOffset >= block.timestamp, TWAB_INIT__INVALID_PERIOD_OFFSET());
         PERIOD_OFFSET = _periodOffset;
     }
 
     function increaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
-        require(_amount != 0, INCREASE_BALANCE__INVALID_AMOUNT());
+        require(_amount != 0, TWAB_INCREASE_BALANCE__INVALID_AMOUNT());
 
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _increaseBalance(accounts[_account], _amount);
@@ -42,10 +42,10 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function decreaseBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
-        require(_amount != 0, DECREASE_BALANCE__INVALID_AMOUNT());
+        require(_amount != 0, TWAB_DECREASE_BALANCE__INVALID_AMOUNT());
 
         AccountDetails storage account = accounts[_account];
-        require(_amount <= account.balance, DECREASE_BALANCE__INSUFFICIENT_BALANCE());
+        require(_amount <= account.balance, TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE());
 
         (uint256 newBalance, Observation memory observation, bool isNewObservation) =
             _decreaseBalance(accounts[_account], _amount);
@@ -59,7 +59,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function getTwabBetween(address _account, uint256 _startTime, uint256 _endTime) external view returns (uint256) {
-        require(_startTime <= _endTime, TWAB_BETWEEN__INVALID_TIME_RANGE());
+        require(_startTime <= _endTime, TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE());
 
         AccountDetails memory account = accounts[_account];
 
@@ -92,7 +92,7 @@ contract TwabController is ITwabController, Ownable {
         Observation memory oldestObservation = _account.observations[oldestIndex];
 
         if (oldestObservation.timestamp > _targetTime) {
-            require(_account.cardinality < MAX_CARDINALITY, TWAB_BETWEEN__INSUFFICIENT_HISTORY());
+            require(_account.cardinality < MAX_CARDINALITY, TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY());
 
             return Observation({cumulativeBalance: 0, balance: 0, timestamp: 0});
         }

@@ -7,10 +7,10 @@ import {IPool} from "@lucky-me/interfaces/IPool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
 import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
 import {
-    DEPOSIT__INVALID_AMOUNT,
-    WITHDRAW__INVALID_AMOUNT,
-    WITHDRAW__INVALID_BALANCE,
-    INVALID_ADDRESS
+    POOL_DEPOSIT__INVALID_AMOUNT,
+    POOL_WITHDRAW__INVALID_AMOUNT,
+    POOL_WITHDRAW__INVALID_BALANCE,
+    POOL_INIT__INVALID_ADDRESS
 } from "@lucky-me/utils/Errors.sol";
 import {Deposited, Withdrawn} from "@lucky-me/utils/Events.sol";
 import {MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
@@ -21,7 +21,7 @@ contract Pool is IPool {
     TwabController public immutable twabController;
 
     constructor(address _usdcAddress, address _aavePoolAddress, uint256 _startTime) {
-        require(_usdcAddress != address(0) && _aavePoolAddress != address(0), INVALID_ADDRESS());
+        require(_usdcAddress != address(0) && _aavePoolAddress != address(0), POOL_INIT__INVALID_ADDRESS());
 
         AAVE_POOL = IAavePool(_aavePoolAddress);
         USDC = IERC20(_usdcAddress);
@@ -29,7 +29,7 @@ contract Pool is IPool {
     }
 
     function deposit(uint256 _amount) external {
-        require(_amount >= MIN_DEPOSIT, DEPOSIT__INVALID_AMOUNT());
+        require(_amount >= MIN_DEPOSIT, POOL_DEPOSIT__INVALID_AMOUNT());
 
         uint256 newBalance = twabController.increaseBalance(msg.sender, _amount);
 
@@ -43,10 +43,10 @@ contract Pool is IPool {
     }
 
     function withdraw(uint256 _amount) external {
-        require(_amount != 0, WITHDRAW__INVALID_AMOUNT());
+        require(_amount != 0, POOL_WITHDRAW__INVALID_AMOUNT());
 
         uint256 newBalance = twabController.decreaseBalance(msg.sender, _amount);
-        require(newBalance >= MIN_DEPOSIT || newBalance == 0, WITHDRAW__INVALID_BALANCE());
+        require(newBalance >= MIN_DEPOSIT || newBalance == 0, POOL_WITHDRAW__INVALID_BALANCE());
 
         AAVE_POOL.withdraw(address(USDC), _amount, msg.sender);
 

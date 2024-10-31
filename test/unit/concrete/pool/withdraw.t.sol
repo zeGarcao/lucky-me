@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {Pool_Unit_Shared_Test} from "../../shared/Pool.t.sol";
 
-import {WITHDRAW__INVALID_AMOUNT, WITHDRAW__INVALID_BALANCE} from "@lucky-me/utils/Errors.sol";
+import {POOL_WITHDRAW__INVALID_AMOUNT, POOL_WITHDRAW__INVALID_BALANCE} from "@lucky-me/utils/Errors.sol";
 import {Withdrawn} from "@lucky-me/utils/Events.sol";
 
 contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
@@ -43,8 +43,8 @@ contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
     // =================================== UNHAPPY TESTS ===================================
 
     function test_RevertWhen_WithdrawAmountIsZero() public whenWithdrawAmountIsZero {
-        // Expect revert with `WITHDRAW__INVALID_AMOUNT` error
-        vm.expectRevert(WITHDRAW__INVALID_AMOUNT.selector);
+        // Expect revert with `POOL_WITHDRAW__INVALID_AMOUNT` error
+        vm.expectRevert(POOL_WITHDRAW__INVALID_AMOUNT.selector);
         pool.withdraw(withdrawAmount);
     }
 
@@ -53,8 +53,8 @@ contract Withdraw_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenWithdrawAmountIsNotZero
         whenNewBalanceNotZeroAndBelowMin
     {
-        // Expect revert with `WITHDRAW__INVALID_BALANCE` error
-        vm.expectRevert(WITHDRAW__INVALID_BALANCE.selector);
+        // Expect revert with `POOL_WITHDRAW__INVALID_BALANCE` error
+        vm.expectRevert(POOL_WITHDRAW__INVALID_BALANCE.selector);
         vm.prank(bob);
         pool.withdraw(withdrawAmount);
     }

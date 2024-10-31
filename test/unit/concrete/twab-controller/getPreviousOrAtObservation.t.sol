@@ -8,7 +8,7 @@ import {TwabControllerHarness} from "../../../harness/TwabControllerHarness.sol"
 
 import {AccountDetails, Observation} from "@lucky-me/utils/Structs.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
-import {TWAB_BETWEEN__INSUFFICIENT_HISTORY} from "@lucky-me/utils/Errors.sol";
+import {TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY} from "@lucky-me/utils/Errors.sol";
 import {RingBufferLib} from "@lucky-me/libraries/RingBufferLib.sol";
 
 contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
@@ -119,7 +119,8 @@ contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Sh
         whenCardinalityReachedMax
         whenOldestObservationTimestampGreaterThanTargetTime
     {
-        vm.expectRevert(TWAB_BETWEEN__INSUFFICIENT_HISTORY.selector);
+        // Expect revert with `TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY` error
+        vm.expectRevert(TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY.selector);
         twabControllerHarness.getPreviousOrAtObservation(bob, targetTime);
     }
 

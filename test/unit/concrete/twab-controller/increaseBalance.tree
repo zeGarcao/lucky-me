@@ -3,7 +3,7 @@ increaseBalance.t.sol
 │   └── it should revert
 └── when caller is the owner
     ├── when amount is zero
-    │   └── it should revert with {INCREASE_BALANCE__INVALID_AMOUNT} error
+    │   └── it should revert with {TWAB_INCREASE_BALANCE__INVALID_AMOUNT} error
     └── when amount is not zero
         ├── when cardinality is zero
         │   ├── it should increase the {AccountDetails} balance by amount

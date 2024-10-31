@@ -3,7 +3,10 @@ pragma solidity ^0.8.27;
 
 import {TwabController_Unit_Shared_Test} from "../../shared/TwabController.t.sol";
 
-import {DECREASE_BALANCE__INVALID_AMOUNT, DECREASE_BALANCE__INSUFFICIENT_BALANCE} from "@lucky-me/utils/Errors.sol";
+import {
+    TWAB_DECREASE_BALANCE__INVALID_AMOUNT,
+    TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE
+} from "@lucky-me/utils/Errors.sol";
 import {MIN_DEPOSIT, PERIOD_LENGTH, MAX_CARDINALITY} from "@lucky-me/utils/Constants.sol";
 import {BalanceDecreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
@@ -76,14 +79,14 @@ contract DecreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     }
 
     function test_RevertWhen_AmountIsZero() public whenOwner whenAmountIsZero {
-        // Expect revert with `DECREASE_BALANCE__INVALID_AMOUNT` error
-        vm.expectRevert(DECREASE_BALANCE__INVALID_AMOUNT.selector);
+        // Expect revert with `TWAB_DECREASE_BALANCE__INVALID_AMOUNT` error
+        vm.expectRevert(TWAB_DECREASE_BALANCE__INVALID_AMOUNT.selector);
         twabController.decreaseBalance(bob, decreaseAmount);
     }
 
     function test_RevertWhen_InsufficientBalance() public whenOwner whenAmountIsNotZero whenBalanceIsInsufficient {
-        // Expect revert with `DECREASE_BALANCE__INSUFFICIENT_BALANCE` error
-        vm.expectRevert(DECREASE_BALANCE__INSUFFICIENT_BALANCE.selector);
+        // Expect revert with `TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE` error
+        vm.expectRevert(TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE.selector);
         twabController.decreaseBalance(bob, decreaseAmount);
     }
 

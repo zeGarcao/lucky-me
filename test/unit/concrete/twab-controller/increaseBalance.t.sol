@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {TwabController_Unit_Shared_Test} from "../../shared/TwabController.t.sol";
 
-import {INCREASE_BALANCE__INVALID_AMOUNT} from "@lucky-me/utils/Errors.sol";
+import {TWAB_INCREASE_BALANCE__INVALID_AMOUNT} from "@lucky-me/utils/Errors.sol";
 import {BalanceIncreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH, MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
@@ -70,8 +70,8 @@ contract IncreaseBalance_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     }
 
     function test_RevertWhen_AmountIsZero() public whenOwner whenAmountIsZero {
-        // Expect revert with `INCREASE_BALANCE__INVALID_AMOUNT` error
-        vm.expectRevert(INCREASE_BALANCE__INVALID_AMOUNT.selector);
+        // Expect revert with `TWAB_INCREASE_BALANCE__INVALID_AMOUNT` error
+        vm.expectRevert(TWAB_INCREASE_BALANCE__INVALID_AMOUNT.selector);
         twabController.increaseBalance(bob, increaseAmount);
     }
 
