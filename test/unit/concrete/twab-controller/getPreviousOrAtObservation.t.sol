@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {console} from "forge-std/Test.sol";
-
 import {TwabController_Unit_Shared_Test} from "../../shared/TwabController.t.sol";
 import {TwabControllerHarness} from "../../../harness/TwabControllerHarness.sol";
 
@@ -43,7 +41,7 @@ contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Sh
     }
 
     modifier whenCardinalityGreaterThanTwo() {
-        for (uint256 i; i < 3; ++i) {
+        for (uint256 i; i < 4; ++i) {
             skip(PERIOD_LENGTH);
             twabControllerHarness.increaseBalance(bob, 10e6);
         }
@@ -99,8 +97,9 @@ contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Sh
     modifier whenAfterOrAtObservationTimestampEqualToTargetTime() {
         AccountDetails memory account = twabControllerHarness.getAccount(bob);
         uint256 newestIndex = RingBufferLib.newestIndex(account.nextObservationIndex, account.cardinality);
-        targetTime = account.observations[newestIndex].timestamp;
-        expectedObservation = account.observations[newestIndex];
+        uint256 prevIndex = RingBufferLib.prevIndex(newestIndex, MAX_CARDINALITY);
+        targetTime = account.observations[prevIndex].timestamp;
+        expectedObservation = account.observations[prevIndex];
         _;
     }
 
