@@ -135,8 +135,7 @@ contract TwabController is ITwabController, Ownable {
         uint256 currentIndex;
 
         while (true) {
-            // TODO - replace div operator with bit shifting
-            currentIndex = (leftSide + rightSide) / 2;
+            currentIndex = (leftSide + rightSide) >> 1;
 
             beforeOrAtIndex = RingBufferLib.wrap(currentIndex, _cardinality);
             beforeOrAt = _observations[beforeOrAtIndex];
