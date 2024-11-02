@@ -34,5 +34,8 @@ abstract contract BaseTest is Test {
         usdc.mint(bob, 1_000_000e6);
         vm.prank(bob);
         usdc.approve(address(pool), 1_000_000e6);
+
+        // Skip 1 week in time
+        skip(1 weeks);
     }
 }

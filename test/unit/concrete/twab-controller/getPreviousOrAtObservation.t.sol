@@ -17,7 +17,6 @@ contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Sh
     function setUp() public virtual override {
         TwabController_Unit_Shared_Test.setUp();
         twabControllerHarness = new TwabControllerHarness(block.timestamp);
-        skip(1 weeks);
     }
 
     // ================================== SETUP MODIFIERS ==================================
