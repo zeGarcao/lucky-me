@@ -89,7 +89,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _increaseBalance(AccountDetails storage _account, uint256 _amount)
-        private
+        internal
         returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
     {
         newBalance = _account.balance + _amount;
@@ -99,7 +99,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _decreaseBalance(AccountDetails storage _account, uint256 _amount)
-        private
+        internal
         returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
     {
         newBalance = _account.balance - _amount;
@@ -109,7 +109,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _recordObservation(AccountDetails storage _account)
-        private
+        internal
         returns (Observation memory observation, bool isNew)
     {
         uint256 currentPeriod = _getPeriod(block.timestamp);
@@ -138,13 +138,13 @@ contract TwabController is ITwabController, Ownable {
         _account.observations[nextIndex] = observation;
     }
 
-    function _getPeriod(uint256 timestamp) private view returns (uint256) {
+    function _getPeriod(uint256 timestamp) internal view returns (uint256) {
         if (timestamp < PERIOD_OFFSET) return 0;
         return (timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
     }
 
     function _getPreviousOrAtObservation(AccountDetails memory _account, uint256 _targetTime)
-        private
+        internal
         pure
         returns (Observation memory)
     {
@@ -184,7 +184,7 @@ contract TwabController is ITwabController, Ownable {
         uint256 _targetTime,
         uint256 _cardinality
     )
-        private
+        internal
         pure
         returns (
             Observation memory beforeOrAt,
@@ -217,7 +217,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _calculateTemporaryObservation(Observation memory _observation, uint256 _timestamp)
-        private
+        internal
         pure
         returns (Observation memory)
     {

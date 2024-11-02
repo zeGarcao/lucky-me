@@ -26,7 +26,7 @@ abstract contract BaseTest is Test {
         pool = new Pool(address(usdc), address(aavePool), block.timestamp);
 
         // Get twab controller
-        twabController = TwabController(pool.twabController());
+        twabController = TwabController(pool.TWAB_CONTROLLER());
 
         // Setup user account with USDC
         usdc.mint(bob, 1_000_000e6);
