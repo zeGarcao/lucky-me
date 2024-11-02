@@ -1,0 +1,20 @@
+getTwabBetween.t.sol
+├── when start time is greater than end time
+│   └── it should revert with {TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE} error
+├── when start time equals to end time
+│   └── it should return the balance of the end observation
+└── when start time lower than end time
+    ├── when start observation timestamp equals start time
+    │   ├── when end observation timestamp equals end time
+    │   │   └── it should return the twab between start and end observations timestamps
+    │   └── when end observation timestamp differs from end time
+    │       ├── it should create a temporary observation for end observation with the correct timestamp
+    │       └── it should return the twab between start observation timestamp and end time
+    └── when start observation timestamp differs from start time
+        ├── when end observation timestamp equals end time
+        │   ├── it should create a temporary observation for start observation with the correct timestamp
+        │   └── it should return the twab between start time and end observation timestamp
+        └── when end observation timestamp differs from end time
+            ├── it should create a temporary observation for start observation with the correct timestamp
+            ├── it should create a temporary observation for end observation with the correct timestamp
+            └── it should return the twab between start time and end time
