@@ -80,8 +80,71 @@ contract TwabController is ITwabController, Ownable {
         return (endObservation.cumulativeBalance - startObservation.cumulativeBalance) / (_endTime - _startTime);
     }
 
+    function getAccount(address _account) public view returns (AccountDetails memory) {
+        return accounts[_account];
+    }
+
+    function getTotalSupplyAccount() public view returns (AccountDetails memory) {
+        return totalSupplyAccount;
+    }
+
+    function _increaseBalance(AccountDetails storage _account, uint256 _amount)
+        private
+        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
+    {
+        newBalance = _account.balance + _amount;
+        _account.balance = newBalance;
+
+        (observation, isNewObservation) = _recordObservation(_account);
+    }
+
+    function _decreaseBalance(AccountDetails storage _account, uint256 _amount)
+        private
+        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
+    {
+        newBalance = _account.balance - _amount;
+        _account.balance = newBalance;
+
+        (observation, isNewObservation) = _recordObservation(_account);
+    }
+
+    function _recordObservation(AccountDetails storage _account)
+        private
+        returns (Observation memory observation, bool isNew)
+    {
+        uint256 currentPeriod = _getPeriod(block.timestamp);
+
+        uint256 lastObservationIndex = RingBufferLib.newestIndex(_account.nextObservationIndex, MAX_CARDINALITY);
+        uint256 nextIndex = lastObservationIndex;
+        Observation memory lastObservation = _account.observations[lastObservationIndex];
+        uint256 lastPeriod = _getPeriod(lastObservation.timestamp);
+
+        uint256 cardinality = _account.cardinality;
+        isNew = cardinality == 0 || currentPeriod > lastPeriod;
+
+        if (isNew) {
+            nextIndex = _account.nextObservationIndex;
+            _account.nextObservationIndex = RingBufferLib.nextIndex(nextIndex, MAX_CARDINALITY);
+            _account.cardinality = cardinality < MAX_CARDINALITY ? cardinality + 1 : MAX_CARDINALITY;
+        }
+
+        observation = Observation({
+            balance: _account.balance,
+            cumulativeBalance: lastObservation.cumulativeBalance
+                + lastObservation.balance * (block.timestamp - lastObservation.timestamp),
+            timestamp: block.timestamp
+        });
+
+        _account.observations[nextIndex] = observation;
+    }
+
+    function _getPeriod(uint256 timestamp) private view returns (uint256) {
+        if (timestamp < PERIOD_OFFSET) return 0;
+        return (timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
+    }
+
     function _getPreviousOrAtObservation(AccountDetails memory _account, uint256 _targetTime)
-        internal
+        private
         pure
         returns (Observation memory)
     {
@@ -121,7 +184,7 @@ contract TwabController is ITwabController, Ownable {
         uint256 _targetTime,
         uint256 _cardinality
     )
-        internal
+        private
         pure
         returns (
             Observation memory beforeOrAt,
@@ -154,7 +217,7 @@ contract TwabController is ITwabController, Ownable {
     }
 
     function _calculateTemporaryObservation(Observation memory _observation, uint256 _timestamp)
-        internal
+        private
         pure
         returns (Observation memory)
     {
@@ -163,68 +226,5 @@ contract TwabController is ITwabController, Ownable {
             balance: _observation.balance,
             timestamp: _timestamp
         });
-    }
-
-    function _increaseBalance(AccountDetails storage _account, uint256 _amount)
-        internal
-        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
-    {
-        newBalance = _account.balance + _amount;
-        _account.balance = newBalance;
-
-        (observation, isNewObservation) = _recordObservation(_account);
-    }
-
-    function _decreaseBalance(AccountDetails storage _account, uint256 _amount)
-        internal
-        returns (uint256 newBalance, Observation memory observation, bool isNewObservation)
-    {
-        newBalance = _account.balance - _amount;
-        _account.balance = newBalance;
-
-        (observation, isNewObservation) = _recordObservation(_account);
-    }
-
-    function _recordObservation(AccountDetails storage _account)
-        internal
-        returns (Observation memory observation, bool isNew)
-    {
-        uint256 currentPeriod = _getPeriod(block.timestamp);
-
-        uint256 lastObservationIndex = RingBufferLib.newestIndex(_account.nextObservationIndex, MAX_CARDINALITY);
-        uint256 nextIndex = lastObservationIndex;
-        Observation memory lastObservation = _account.observations[lastObservationIndex];
-        uint256 lastPeriod = _getPeriod(lastObservation.timestamp);
-
-        uint256 cardinality = _account.cardinality;
-        isNew = cardinality == 0 || currentPeriod > lastPeriod;
-
-        if (isNew) {
-            nextIndex = _account.nextObservationIndex;
-            _account.nextObservationIndex = RingBufferLib.nextIndex(nextIndex, MAX_CARDINALITY);
-            _account.cardinality = cardinality < MAX_CARDINALITY ? cardinality + 1 : MAX_CARDINALITY;
-        }
-
-        observation = Observation({
-            balance: _account.balance,
-            cumulativeBalance: lastObservation.cumulativeBalance
-                + lastObservation.balance * (block.timestamp - lastObservation.timestamp),
-            timestamp: block.timestamp
-        });
-
-        _account.observations[nextIndex] = observation;
-    }
-
-    function _getPeriod(uint256 timestamp) internal view returns (uint256) {
-        if (timestamp < PERIOD_OFFSET) return 0;
-        return (timestamp - PERIOD_OFFSET) / PERIOD_LENGTH;
-    }
-
-    function getAccount(address _account) public view returns (AccountDetails memory) {
-        return accounts[_account];
-    }
-
-    function getTotalSupplyAccount() public view returns (AccountDetails memory) {
-        return totalSupplyAccount;
     }
 }
