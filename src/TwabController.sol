@@ -19,8 +19,8 @@ import {
 contract TwabController is ITwabController, Ownable {
     uint256 public immutable PERIOD_OFFSET;
 
-    mapping(address => AccountDetails) public accounts;
     AccountDetails public totalSupplyAccount;
+    mapping(address => AccountDetails) public accounts;
 
     constructor(uint256 _periodOffset) Ownable(msg.sender) {
         require(_periodOffset >= block.timestamp, TWAB_INIT__INVALID_PERIOD_OFFSET());

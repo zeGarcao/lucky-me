@@ -15,9 +15,9 @@ import {Deposited, Withdrawn} from "@lucky-me/utils/Events.sol";
 import {MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
 
 contract Pool is IPool {
+    TwabController public immutable twabController;
     IAavePool public immutable AAVE_POOL;
     IERC20 public immutable USDC;
-    TwabController public immutable twabController;
 
     constructor(address _usdcAddress, address _aavePoolAddress, uint256 _startTime) {
         require(_usdcAddress != address(0) && _aavePoolAddress != address(0), POOL_INIT__INVALID_ADDRESS());
