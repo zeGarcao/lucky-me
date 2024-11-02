@@ -3,7 +3,6 @@ pragma solidity ^0.8.27;
 
 import {TwabController_Unit_Shared_Test} from "../../shared/TwabController.t.sol";
 import {TwabControllerHarness} from "../../../harness/TwabControllerHarness.sol";
-
 import {AccountDetails, Observation} from "@lucky-me/utils/Structs.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
 import {TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY} from "@lucky-me/utils/Errors.sol";
