@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {ITwabController} from "./interfaces/ITwabController.sol";
-import {RingBufferLib} from "./libraries/RingBufferLib.sol";
+import {ITwabController} from "@lucky-me/interfaces/ITwabController.sol";
+import {RingBufferLib} from "@lucky-me/libraries/RingBufferLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "./utils/Events.sol";
-import {MAX_CARDINALITY, PERIOD_LENGTH} from "./utils/Constants.sol";
-import {Observation, AccountDetails} from "./utils/Structs.sol";
+import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
+import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
+import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
 import {
     TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE,
     TWAB_DECREASE_BALANCE__INVALID_AMOUNT,
@@ -14,7 +14,7 @@ import {
     TWAB_INIT__INVALID_PERIOD_OFFSET,
     TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE,
     TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY
-} from "./utils/Errors.sol";
+} from "@lucky-me/utils/Errors.sol";
 
 contract TwabController is ITwabController, Ownable {
     uint256 public immutable PERIOD_OFFSET;

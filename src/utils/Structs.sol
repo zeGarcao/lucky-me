@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {MAX_CARDINALITY} from "./Constants.sol";
+import {MAX_CARDINALITY} from "@lucky-me/utils/Constants.sol";
 
 struct Observation {
     uint256 balance;
