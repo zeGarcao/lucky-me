@@ -12,6 +12,6 @@ contract TwabControllerHarness is TwabController {
         view
         returns (Observation memory)
     {
-        return _getPreviousOrAtObservation(accounts[_account], _targetTime);
+        return _getPreviousOrAtObservation(getAccount(_account), _targetTime);
     }
 }
