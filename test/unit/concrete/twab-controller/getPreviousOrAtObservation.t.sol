@@ -210,7 +210,7 @@ contract GetPreviousOrAtObservation_Unit_Concrete_Test is TwabController_Unit_Sh
         _assertExpectedObservation();
     }
 
-    function _assertExpectedObservation() internal {
+    function _assertExpectedObservation() internal view {
         // Get observation previous or at target time
         Observation memory observation = twabControllerHarness.getPreviousOrAtObservation(bob, targetTime);
 
