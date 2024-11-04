@@ -269,8 +269,8 @@ contract TwabController is ITwabController, Ownable {
 
     /**
      * @notice Fetches observations `beforeOrAt` and `afterOrAt` a `_targetTime`.
-     * @dev The `_targetTime` must fall within the boundaries of the provided `_observations`.
-     * Meaning the `_targetTime` must be older than the newest observation and younger, or the same age as, the oldest observation.
+     * @dev The `_targetTime` must fall within the boundaries of the provided `_observations`, meaning the `_targetTime`
+     *      must be older than the newest observation and younger, or the same age as, the oldest observation.
      * @param _observations List of observations to perfom the search.
      * @param _newestIndex Index of the newest observation - right side of the circular buffer.
      * @param _oldestIndex Index of the oldest observation - left side of the circular buffer.
