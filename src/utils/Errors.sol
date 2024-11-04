@@ -12,7 +12,7 @@ error POOL_WITHDRAW__INVALID_AMOUNT();
 error POOL_WITHDRAW__INVALID_BALANCE();
 
 /* ===================================== TWAB ERRORS ==================================== */
-/// @notice Emitted when an invalid period offset is passed to the twab controller.
+/// @notice Emitted when an invalid period offset is passed to the twab controller constructor.
 error TWAB_INIT__INVALID_PERIOD_OFFSET();
 /// @notice Emitted when increase amount is zero.
 error TWAB_INCREASE_BALANCE__INVALID_AMOUNT();
@@ -24,3 +24,9 @@ error TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE();
 error TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE();
 /// @notice Emitted when there is no sufficient history to lookup a twab time range.
 error TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY();
+
+/* ===================================== DRAW MANAGER ERRORS ==================================== */
+/// @notice Emitted when an invalid period offset is passed to the draw manager.
+error DRAW__INVALID_PERIOD_OFFSET();
+/// @notice Emitted when checking for the current draw id and none has started yet.
+error DRAW_CURRENT_DRAW__NO_OPEN_DRAW();

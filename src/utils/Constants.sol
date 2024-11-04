@@ -7,3 +7,5 @@ uint256 constant MIN_DEPOSIT = 10e6;
 uint256 constant PERIOD_LENGTH = 1 hours;
 // Maximum ring buffer length for observation list. With minimum period of 1 hour, this allows for minimum two years of history.
 uint256 constant MAX_CARDINALITY = 17520;
+// Time duration of a draw.
+uint256 constant DRAW_DURATION = 1 weeks;
