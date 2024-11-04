@@ -4,6 +4,7 @@ pragma solidity ^0.8.27;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPool} from "@lucky-me/interfaces/IPool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
+import {DrawManager} from "@lucky-me/DrawManager.sol";
 import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
 import {
     POOL_DEPOSIT__INVALID_AMOUNT,
@@ -18,6 +19,8 @@ import {MIN_DEPOSIT} from "@lucky-me/utils/Constants.sol";
 contract Pool is IPool {
     /// @notice Instance of TwabController responsible for managing balances.
     TwabController public immutable TWAB_CONTROLLER;
+    /// @notice Instance of DrawManager responsible for managing draws.
+    DrawManager public immutable DRAW_MANAGER;
     /// @notice Instance of Aave pool where the funds are put to work.
     IAavePool public immutable AAVE_POOL;
     /// @notice Instance of USDC token
@@ -32,6 +35,7 @@ contract Pool is IPool {
         AAVE_POOL = IAavePool(_aavePoolAddress);
         USDC = IERC20(_usdcAddress);
         TWAB_CONTROLLER = new TwabController(_startTime);
+        DRAW_MANAGER = new DrawManager(_startTime);
     }
 
     /* ===================== Public & External Functions ===================== */
