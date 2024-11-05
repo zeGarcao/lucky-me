@@ -1,3 +1,4 @@
+@chainlink/=lib/chainlink/contracts/src/v0.8
 @lucky-me/=src/
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
 ds-test/=lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/
