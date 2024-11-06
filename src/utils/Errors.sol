@@ -26,5 +26,4 @@ error TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE();
 error TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY();
 
 /* ===================================== DRAW MANAGER ERRORS ==================================== */
-/// @notice Emitted when an invalid period offset is passed to the draw manager constructor.
-error DRAW_INIT__INVALID_PERIOD_OFFSET();
+error DRAW_INIT__INVALID_GENESIS_START_TIME();
