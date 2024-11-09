@@ -46,3 +46,42 @@ event BalanceDecreased(address indexed account, uint256 amount, uint256 balance,
  * @param isNew Flag indicating whether the observation is new or not.
  */
 event ObservationRecorded(address indexed account, Observation observation, bool isNew);
+
+/**
+ * @notice Emitted whenever a randomness request is sent.
+ * @param requestId Id of the request.
+ * @param drawId Id of the draw.
+ * @param timestamp Timestamp of the request.
+ */
+event RandomnessRequestSent(uint256 indexed requestId, uint256 indexed drawId, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a randomness request is fulffiled.
+ * @param requestId Id of the request.
+ * @param timestamp Timestamp of the fulfillment.
+ */
+event RandomnessRequestFulFilled(uint256 indexed requestId, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the randomness request configuration is updated.
+ * @param callbackGasLimit Gas limit used by the callback.
+ * @param requestConfirmations Number of request confirmations.
+ * @param timestamp Timestamp of the update.
+ */
+event RequestConfigUpdated(uint32 callbackGasLimit, uint16 requestConfirmations, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is set up for a draw.
+ * @param drawId Id of the draw.
+ * @param prize Prize assigned to the draw.
+ * @param timestamp Timestamp of prize setup.
+ */
+event PrizeSetUp(uint256 indexed drawId, uint256 prize, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the keeper is updated.
+ * @param newKeeper Address of the new keeper.
+ * @param oldKeeper Address of the old keeper.
+ * @param timestamp Timestamp of the update.
+ */
+event KeeperUpdated(address indexed newKeeper, address indexed oldKeeper, uint256 timestamp);
