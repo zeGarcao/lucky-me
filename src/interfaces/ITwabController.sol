@@ -50,7 +50,7 @@ interface ITwabController {
      * @notice Gets the total supply balance.
      * @return Total supply balance.
      */
-    function getTotalSupply() public view returns (uint256);
+    function getTotalSupply() external view returns (uint256);
 
     /**
      * @notice Gets the time offset of the first period.
