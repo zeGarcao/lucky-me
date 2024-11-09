@@ -115,6 +115,11 @@ contract TwabController is ITwabController, Ownable {
         return _totalSupplyAccount;
     }
 
+    /// @inheritdoc ITwabController
+    function getTotalSupply() public view returns (uint256) {
+        return _totalSupplyAccount.balance;
+    }
+
     /* ===================== Internal & Private Functions ===================== */
 
     /**
