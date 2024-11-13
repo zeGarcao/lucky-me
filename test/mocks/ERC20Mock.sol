@@ -3,8 +3,14 @@ pragma solidity ^0.8.27;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract USDCMock is ERC20 {
-    constructor() ERC20("USDC Token Mock", "USDC") {}
+contract ERC20Mock is ERC20 {
+    uint8 private _decimals;
+
+    constructor(string memory _tokenName, string memory _tokenSymbol, uint8 _tokenDecimals)
+        ERC20(_tokenName, _tokenSymbol)
+    {
+        _decimals = _tokenDecimals;
+    }
 
     function mint(address account, uint256 amount) external {
         _mint(account, amount);
@@ -14,7 +20,7 @@ contract USDCMock is ERC20 {
         _burn(account, amount);
     }
 
-    function decimals() public pure override returns (uint8) {
-        return 6;
+    function decimals() public view override returns (uint8) {
+        return _decimals;
     }
 }

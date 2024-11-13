@@ -5,10 +5,10 @@ import {Test} from "forge-std/Test.sol";
 import {Pool} from "@lucky-me/Pool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
 import {AavePoolMock} from "./mocks/AavePoolMock.sol";
-import {USDCMock} from "./mocks/USDCMock.sol";
+import {ERC20Mock} from "./mocks/ERC20Mock.sol";
 
 abstract contract BaseTest is Test {
-    USDCMock usdc;
+    ERC20Mock usdc;
     AavePoolMock aavePool;
     Pool pool;
     TwabController twabController;
@@ -18,7 +18,7 @@ abstract contract BaseTest is Test {
 
     function setUp() public virtual {
         // Deploy USDC and Aave pool mocks
-        usdc = new USDCMock();
+        usdc = new ERC20Mock("USDC Mock", "USDC", 6);
         aavePool = new AavePoolMock();
 
         // Deploy Lucky Me pool
