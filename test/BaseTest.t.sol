@@ -26,6 +26,9 @@ abstract contract BaseTest is Test {
     address keeper = makeAddr("keeper");
 
     function setUp() public virtual {
+        // Skip 1 week in time
+        skip(1 weeks);
+
         // Deploy mocks
         usdc = new ERC20Mock("USDC Mock", "USDC", 6);
         aUsdc = new ERC20Mock("aUSDC Mock", "aUSDC", 6);
@@ -55,8 +58,5 @@ abstract contract BaseTest is Test {
         usdc.mint(bob, 1_000_000e6);
         vm.prank(bob);
         usdc.approve(address(pool), 1_000_000e6);
-
-        // Skip 1 day in time
-        skip(1 days);
     }
 }
