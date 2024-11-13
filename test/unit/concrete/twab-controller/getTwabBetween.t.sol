@@ -80,12 +80,15 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
     // ==================================== HAPPY TESTS ====================================
 
     function test_GetTwabBetween_StartTimeEqualsEndTime() public whenStartTimeEqualsEndTime {
+        // Get Bob's twab between `startTime` and `endTime`
         uint256 bobTwab = twabController.getTwabBetween(bob, startTime, endTime);
 
+        // Compute expected twab
         AccountDetails memory bobAccount = twabController.getAccount(bob);
         uint256 newestIndex = RingBufferLib.newestIndex(bobAccount.nextObservationIndex, bobAccount.cardinality);
         uint256 expectedTwab = bobAccount.observations[newestIndex].balance;
 
+        // Asserting that Bob's has the expected twab
         assertEq(bobTwab, expectedTwab);
     }
 
@@ -95,11 +98,14 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         whenStartObservationTimestampEqualsStartTime
         whenEndObservationTimestampEqualsEndTime
     {
+        // Get Bob's twab between `startTime` and `endTime`
         uint256 bobTwab = twabController.getTwabBetween(bob, startTime, endTime);
 
+        // Compute expected twab
         uint256 expectedTwab = (endObservation.cumulativeBalance - startObservation.cumulativeBalance)
             / (endObservation.timestamp - startObservation.timestamp);
 
+        // Asserting that Bob's has the expected twab
         assertEq(bobTwab, expectedTwab);
     }
 
@@ -109,18 +115,20 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         whenStartObservationTimestampEqualsStartTime
         whenEndObservationTimestampDiffersEndTime
     {
+        // Get Bob's twab between `startTime` and `endTime`
         uint256 bobTwab = twabController.getTwabBetween(bob, startTime, endTime);
 
+        // Compute expected twab
         Observation memory temporaryEndObservation = Observation({
             cumulativeBalance: endObservation.cumulativeBalance
                 + endObservation.balance * (endTime - endObservation.timestamp),
             balance: endObservation.balance,
             timestamp: endTime
         });
-
         uint256 expectedTwab = (temporaryEndObservation.cumulativeBalance - startObservation.cumulativeBalance)
             / (endTime - startObservation.timestamp);
 
+        // Asserting that Bob's has the expected twab
         assertEq(bobTwab, expectedTwab);
     }
 
@@ -130,18 +138,20 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         whenStartObservationTimestampDiffersStartTime
         whenEndObservationTimestampEqualsEndTime
     {
+        // Get Bob's twab between `startTime` and `endTime`
         uint256 bobTwab = twabController.getTwabBetween(bob, startTime, endTime);
 
+        // Compute expected twab
         Observation memory temporaryStartObservation = Observation({
             cumulativeBalance: startObservation.cumulativeBalance
                 + startObservation.balance * (startTime - startObservation.timestamp),
             balance: startObservation.balance,
             timestamp: startTime
         });
-
         uint256 expectedTwab = (endObservation.cumulativeBalance - temporaryStartObservation.cumulativeBalance)
             / (endObservation.timestamp - startTime);
 
+        // Asserting that Bob's has the expected twab
         assertEq(bobTwab, expectedTwab);
     }
 
@@ -151,8 +161,10 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
         whenStartObservationTimestampDiffersStartTime
         whenEndObservationTimestampDiffersEndTime
     {
+        // Get Bob's twab between `startTime` and `endTime`
         uint256 bobTwab = twabController.getTwabBetween(bob, startTime, endTime);
 
+        // Compute expected twab
         Observation memory temporaryStartObservation = Observation({
             cumulativeBalance: startObservation.cumulativeBalance
                 + startObservation.balance * (startTime - startObservation.timestamp),
@@ -165,10 +177,10 @@ contract GetTwabBetween_Unit_Concrete_Test is TwabController_Unit_Shared_Test {
             balance: endObservation.balance,
             timestamp: endTime
         });
-
         uint256 expectedTwab = (temporaryEndObservation.cumulativeBalance - temporaryStartObservation.cumulativeBalance)
             / (endTime - startTime);
 
+        // Asserting that Bob's has the expected twab
         assertEq(bobTwab, expectedTwab);
     }
 }
