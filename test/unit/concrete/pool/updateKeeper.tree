@@ -1,0 +1,13 @@
+updateKeeper.t.sol
+├── when caller has not {OWNER_ROLE} role
+│   └── it should revert
+└── when caller has {OWNER_ROLE} role
+    ├── when new keeper is address zero
+    │   └── it should revert with {POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS} error
+    └── when new keeper is not address zero
+        ├── when new keeper is the same current keeper
+        │   └── it should revert with {POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS} error
+        └── when new keeper is different from current keeper
+            ├── it should revoke {KEEPER_ROLE} role to current keeper
+            ├── it should grant {KEEPER_ROLE} role to new keeper
+            └── it should emit {KeeperUpdated} event

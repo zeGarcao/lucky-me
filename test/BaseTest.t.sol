@@ -23,6 +23,7 @@ abstract contract BaseTest is Test {
 
     address owner = makeAddr("owner");
     address bob = makeAddr("bob");
+    address rando = makeAddr("rando");
     address keeper = makeAddr("keeper");
 
     function setUp() public virtual {
