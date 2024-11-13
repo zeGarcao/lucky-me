@@ -6,24 +6,47 @@ import {Pool} from "@lucky-me/Pool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
 import {AavePoolMock} from "./mocks/AavePoolMock.sol";
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
+import {SwapRouterMock} from "./mocks/SwapRouterMock.sol";
+import {QuoterMock} from "./mocks/QuoterMock.sol";
+import {VRFWrapperMock} from "./mocks/VRFWrapperMock.sol";
 
 abstract contract BaseTest is Test {
     ERC20Mock usdc;
+    ERC20Mock aUsdc;
+    ERC20Mock link;
     AavePoolMock aavePool;
     Pool pool;
     TwabController twabController;
+    SwapRouterMock swapRouter;
+    QuoterMock quoter;
+    VRFWrapperMock vrfWrapper;
 
     address owner = makeAddr("owner");
     address bob = makeAddr("bob");
+    address keeper = makeAddr("keeper");
 
     function setUp() public virtual {
-        // Deploy USDC and Aave pool mocks
+        // Deploy mocks
         usdc = new ERC20Mock("USDC Mock", "USDC", 6);
+        aUsdc = new ERC20Mock("aUSDC Mock", "aUSDC", 6);
+        aUsdc = new ERC20Mock("LINK Mock", "LINK", 18);
         aavePool = new AavePoolMock();
+        swapRouter = new SwapRouterMock();
+        quoter = new QuoterMock();
+        vrfWrapper = new VRFWrapperMock();
 
         // Deploy Lucky Me pool
         vm.prank(owner);
-        pool = new Pool(address(usdc), address(aavePool), block.timestamp);
+        pool = new Pool(
+            address(usdc),
+            address(aavePool),
+            address(aUsdc),
+            keeper,
+            address(vrfWrapper),
+            address(swapRouter),
+            address(quoter),
+            block.timestamp
+        );
 
         // Get twab controller
         twabController = TwabController(pool.TWAB_CONTROLLER());
@@ -33,7 +56,7 @@ abstract contract BaseTest is Test {
         vm.prank(bob);
         usdc.approve(address(pool), 1_000_000e6);
 
-        // Skip 1 week in time
-        skip(1 weeks);
+        // Skip 1 day in time
+        skip(1 days);
     }
 }
