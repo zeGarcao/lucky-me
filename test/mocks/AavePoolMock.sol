@@ -3,7 +3,7 @@ pragma solidity ^0.8.27;
 
 import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
 import {ERC20Mock} from "./ERC20Mock.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IER20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract AavePoolMock is IAavePool {
     ERC20Mock immutable _receiptToken;
