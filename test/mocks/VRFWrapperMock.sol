@@ -2,42 +2,62 @@
 pragma solidity ^0.8.27;
 
 import {IVRFV2PlusWrapper} from "@chainlink/vrf/dev/interfaces/IVRFV2PlusWrapper.sol";
+import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 
 contract VRFWrapperMock is IVRFV2PlusWrapper {
+    address immutable LINK;
+    uint256 _lastRequestId;
+
+    constructor(address _linkAddress) {
+        LINK = _linkAddress;
+    }
+
     // TODO last request id code
-    function lastRequestId() external view returns (uint256) {}
+    function lastRequestId() external view returns (uint256) {
+        return _lastRequestId;
+    }
 
-    // TODO request price code
-    function calculateRequestPrice(uint32 _callbackGasLimit, uint32 _numWords) external view returns (uint256) {}
+    // Hardcoded price of 0.25 LINK
+    function calculateRequestPrice(uint32, uint32) external view returns (uint256) {
+        return 0.25e18;
+    }
 
-    // TODO request price native code
-    function calculateRequestPriceNative(uint32 _callbackGasLimit, uint32 _numWords) external view returns (uint256) {}
+    function calculateRequestPriceNative(uint32, uint32) external view returns (uint256) {
+        /* Not necessary */
+        return 0;
+    }
 
-    // TODO estimate request price code
-    function estimateRequestPrice(uint32 _callbackGasLimit, uint32 _numWords, uint256 _requestGasPriceWei)
+    function estimateRequestPrice(uint32, uint32, uint256) external view returns (uint256) {
+        /* Not necessary */
+        return 0;
+    }
+
+    function estimateRequestPriceNative(uint32, uint32, uint256) external view returns (uint256) {
+        /* Not necessary */
+        return 0;
+    }
+
+    function requestRandomWordsInNative(uint32, uint16, uint32, bytes calldata)
         external
-        view
-        returns (uint256)
-    {}
+        payable
+        returns (uint256 requestId)
+    {
+        /* Not necessary */
+        return 0;
+    }
 
-    // TODO estimate request price native code
-    function estimateRequestPriceNative(uint32 _callbackGasLimit, uint32 _numWords, uint256 _requestGasPriceWei)
-        external
-        view
-        returns (uint256)
-    {}
+    function link() external view returns (address) {
+        return LINK;
+    }
 
-    // TODO request random words native
-    function requestRandomWordsInNative(
-        uint32 _callbackGasLimit,
-        uint16 _requestConfirmations,
-        uint32 _numWords,
-        bytes calldata extraArgs
-    ) external payable returns (uint256 requestId) {}
+    function linkNativeFeed() external view returns (address) {
+        /* Not necessary */
+        return address(0);
+    }
 
-    // TODO link address code
-    function link() external view returns (address) {}
-
-    // TODO link native feed code
-    function linkNativeFeed() external view returns (address) {}
+    // Mock function to fulfill random request
+    function fulfillRandomWords(address _consumer, uint256 _requestId, uint256[] memory _randomWords) external {
+        _lastRequestId += 1;
+        VRFV2PlusWrapperConsumerBase(_consumer).rawFulfillRandomWords(_requestId, _randomWords);
+    }
 }
