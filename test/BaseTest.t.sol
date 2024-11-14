@@ -35,8 +35,8 @@ abstract contract BaseTest is Test {
         aUsdc = new ERC20Mock("aUSDC Mock", "aUSDC", 6);
         aUsdc = new ERC20Mock("LINK Mock", "LINK", 18);
         aavePool = new AavePoolMock(address(aUsdc));
-        swapRouter = new SwapRouterMock();
         quoter = new QuoterMock();
+        swapRouter = new SwapRouterMock(address(quoter));
         vrfWrapper = new VRFWrapperMock();
 
         // Deploy Lucky Me pool
