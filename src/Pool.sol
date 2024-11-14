@@ -157,9 +157,20 @@ contract Pool is IPool, AccessControl {
         // Ensure there is a sufficient prize amount.
         require(prize >= MIN_PRIZE, POOL_PRIZE_SETUP__PRIZE_TOO_SMALL());
 
+        // Withdraw USDC from Aave and decrease total supply in twab controller.
+        TWAB_CONTROLLER.decreaseTotalSupply(usdcAmountIn);
+        AAVE_POOL.withdraw(address(USDC), usdcAmountIn, address(this));
+
         // Swap USDC for LINK and call DrawManager to award the draw.
         _swapUsdcForLink(_poolFee, randomnessRequestCost, usdcAmountIn);
         DRAW_MANAGER.awardDraw(drawId, prize);
+
+        // Supply to Aave and increase total supply in twab controller if there is a remaining balance.
+        uint256 remainingBalance = USDC.balanceOf(address(this));
+        if (remainingBalance > 0) {
+            TWAB_CONTROLLER.increaseTotalSupply(remainingBalance);
+            AAVE_POOL.supply(address(USDC), remainingBalance, address(this), 0);
+        }
 
         emit PrizeSetUp(drawId, prize, block.timestamp);
     }
