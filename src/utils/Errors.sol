@@ -44,6 +44,12 @@ error TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE();
 error TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE();
 /// @notice Raised when there is no sufficient history to lookup a twab time range.
 error TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY();
+/// @notice Raised when increase amount is zero.
+error TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT();
+/// @notice Raised when decrease amount is zero.
+error TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT();
+/// @notice Raised when total supply is decrease by an amount that exceeds the available total supply.
+error TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE();
 
 /* ===================================== DRAW MANAGER ERRORS ==================================== */
 

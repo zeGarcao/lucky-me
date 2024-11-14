@@ -85,3 +85,19 @@ event PrizeSetUp(uint256 indexed drawId, uint256 prize, uint256 timestamp);
  * @param timestamp Timestamp of the update.
  */
 event KeeperUpdated(address indexed newKeeper, address indexed oldKeeper, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever total supply balance is successfully increased.
+ * @param amount Amount the total supply balance increased by.
+ * @param totalSupply Total supply balance after increase.
+ * @param timestamp Timestamp when the increase took place.
+ */
+event TotalSupplyIncreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever total supply balance is successfully decreased.
+ * @param amount Amount the total supply balance decreased by.
+ * @param totalSupply Total supply balance after decrease.
+ * @param timestamp Timestamp when the decrease took place.
+ */
+event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
