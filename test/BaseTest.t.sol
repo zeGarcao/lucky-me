@@ -6,6 +6,7 @@ import {Pool} from "@lucky-me/Pool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
 import {AavePoolMock} from "./mocks/AavePoolMock.sol";
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
+import {LinkMock} from "./mocks/LinkMock.sol";
 import {SwapRouterMock} from "./mocks/SwapRouterMock.sol";
 import {QuoterMock} from "./mocks/QuoterMock.sol";
 import {VRFWrapperMock} from "./mocks/VRFWrapperMock.sol";
@@ -13,7 +14,7 @@ import {VRFWrapperMock} from "./mocks/VRFWrapperMock.sol";
 abstract contract BaseTest is Test {
     ERC20Mock usdc;
     ERC20Mock aUsdc;
-    ERC20Mock link;
+    LinkMock link;
     AavePoolMock aavePool;
     Pool pool;
     TwabController twabController;
@@ -33,11 +34,11 @@ abstract contract BaseTest is Test {
         // Deploy mocks
         usdc = new ERC20Mock("USDC Mock", "USDC", 6);
         aUsdc = new ERC20Mock("aUSDC Mock", "aUSDC", 6);
-        aUsdc = new ERC20Mock("LINK Mock", "LINK", 18);
+        link = new LinkMock("LINK Mock", "LINK");
         aavePool = new AavePoolMock(address(aUsdc));
         quoter = new QuoterMock();
         swapRouter = new SwapRouterMock(address(quoter));
-        vrfWrapper = new VRFWrapperMock();
+        vrfWrapper = new VRFWrapperMock(address(link));
 
         // Deploy Lucky Me pool
         vm.prank(owner);
