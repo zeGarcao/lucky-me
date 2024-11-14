@@ -24,6 +24,22 @@ interface ITwabController {
     function decreaseBalance(address _account, uint256 _amount) external returns (uint256);
 
     /**
+     * @notice Increases total supply account balance and records the corresponding observation.
+     * @dev This function must only be called by the owner.
+     * @param _amount Amount by which the total supply account balance will increase.
+     * @return New total supply account balance.
+     */
+    function increaseTotalSupply(uint256 _amount) external returns (uint256);
+
+    /**
+     * @notice Decreases total supply account balance and records the corresponding observation.
+     * @dev This function must only be called by the owner.
+     * @param _amount Amount by which the total supply account balance will decrease.
+     * @return New total supply account balance.
+     */
+    function decreaseTotalSupply(uint256 _amount) external returns (uint256);
+
+    /**
      * @notice Gets a user's time-weighted average balance (TWAB) between two timestamps.
      * @dev If timestamps in the range aren't exact matches of observations, balance is extrapolated using the previous observation.
      * @param _account User address pointing to their account.

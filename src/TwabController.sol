@@ -4,7 +4,13 @@ pragma solidity ^0.8.27;
 import {ITwabController} from "@lucky-me/interfaces/ITwabController.sol";
 import {RingBufferLib} from "@lucky-me/libraries/RingBufferLib.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {BalanceIncreased, BalanceDecreased, ObservationRecorded} from "@lucky-me/utils/Events.sol";
+import {
+    BalanceIncreased,
+    BalanceDecreased,
+    ObservationRecorded,
+    TotalSupplyIncreased,
+    TotalSupplyDecreased
+} from "@lucky-me/utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
 import {
@@ -13,7 +19,10 @@ import {
     TWAB_INCREASE_BALANCE__INVALID_AMOUNT,
     TWAB_INIT__INVALID_PERIOD_OFFSET,
     TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE,
-    TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY
+    TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY,
+    TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
+    TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
+    TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE
 } from "@lucky-me/utils/Errors.sol";
 
 // TODO documentation
@@ -46,7 +55,7 @@ contract TwabController is ITwabController, Ownable {
             _increaseBalance(_accounts[_account], _amount);
 
         // Increases the total supply.
-        _increaseBalance(_totalSupplyAccount, _amount);
+        increaseTotalSupply(_amount);
 
         emit BalanceIncreased(_account, _amount, newBalance, block.timestamp);
         emit ObservationRecorded(_account, observation, isNewObservation);
@@ -67,7 +76,7 @@ contract TwabController is ITwabController, Ownable {
         (uint256 newBalance, Observation memory observation, bool isNewObservation) = _decreaseBalance(account, _amount);
 
         // Decreases the total supply.
-        _decreaseBalance(_totalSupplyAccount, _amount);
+        decreaseTotalSupply(_amount);
 
         emit BalanceDecreased(_account, _amount, newBalance, block.timestamp);
         emit ObservationRecorded(_account, observation, isNewObservation);
@@ -103,6 +112,40 @@ contract TwabController is ITwabController, Ownable {
 
         // Formula: Δ_amount / Δ_time
         return (endObservation.cumulativeBalance - startObservation.cumulativeBalance) / (_endTime - _startTime);
+    }
+
+    /// @inheritdoc ITwabController
+    function increaseTotalSupply(uint256 _amount) public onlyOwner returns (uint256) {
+        // Reverts if increase amount is zero.
+        require(_amount != 0, TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT());
+
+        // Increases the total supply.
+        (uint256 newTotalSupply, Observation memory observation, bool isNewObservation) =
+            _increaseBalance(_totalSupplyAccount, _amount);
+
+        emit TotalSupplyIncreased(_amount, newTotalSupply, block.timestamp);
+        emit ObservationRecorded(address(0), observation, isNewObservation);
+
+        return newTotalSupply;
+    }
+
+    /// @inheritdoc ITwabController
+    function decreaseTotalSupply(uint256 _amount) public onlyOwner returns (uint256) {
+        // Reverts if decrease amount is zero.
+        require(_amount != 0, TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT());
+
+        // Reverts if total supply is not sufficient.
+        AccountDetails storage account = _totalSupplyAccount;
+        require(_amount <= account.balance, TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE());
+
+        // Decreases total supply account balance.
+        (uint256 newTotalSupply, Observation memory observation, bool isNewObservation) =
+            _decreaseBalance(account, _amount);
+
+        emit TotalSupplyDecreased(_amount, newTotalSupply, block.timestamp);
+        emit ObservationRecorded(address(0), observation, isNewObservation);
+
+        return newTotalSupply;
     }
 
     /// @inheritdoc ITwabController
