@@ -34,7 +34,7 @@ abstract contract BaseTest is Test {
         usdc = new ERC20Mock("USDC Mock", "USDC", 6);
         aUsdc = new ERC20Mock("aUSDC Mock", "aUSDC", 6);
         aUsdc = new ERC20Mock("LINK Mock", "LINK", 18);
-        aavePool = new AavePoolMock();
+        aavePool = new AavePoolMock(address(aUsdc));
         swapRouter = new SwapRouterMock();
         quoter = new QuoterMock();
         vrfWrapper = new VRFWrapperMock();
