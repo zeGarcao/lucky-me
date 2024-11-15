@@ -5,21 +5,27 @@ import {IVRFV2PlusWrapper} from "@chainlink/vrf/dev/interfaces/IVRFV2PlusWrapper
 import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 
 contract VRFWrapperMock is IVRFV2PlusWrapper {
+    uint256 public constant DEFAULT_PRICE = 0.25e18;
     address immutable LINK;
     uint256 _lastRequestId;
+    uint256 _price;
 
     constructor(address _linkAddress) {
         LINK = _linkAddress;
+        _price = DEFAULT_PRICE;
     }
 
-    // TODO last request id code
     function lastRequestId() external view returns (uint256) {
         return _lastRequestId;
     }
 
-    // Hardcoded price of 0.25 LINK
     function calculateRequestPrice(uint32, uint32) external view returns (uint256) {
-        return 0.25e18;
+        return _price;
+    }
+
+    // Mock function to update request price
+    function updateRequestPirce(uint256 _newPrice) external {
+        _price = _newPrice;
     }
 
     function calculateRequestPriceNative(uint32, uint32) external view returns (uint256) {
