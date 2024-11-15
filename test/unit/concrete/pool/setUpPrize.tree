@@ -1,0 +1,16 @@
+setUpPrize.t.sol
+├── when caller has not {KEEPER_ROLE} role
+│   └── it should revert
+└── when caller has {KEEPER_ROLE} role
+    ├── when draw is not closed
+    │   └── it should revert with {POOL_PRIZE_SETUP__DRAW_NOT_CLOSED} error
+    └── when draw is closed
+        ├── when generated yield is not sufficient to cover swap costs
+        │   └── it should revert with {POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS} error
+        └── when generated yield is sufficient to cover swap costs
+            ├── when prize is below {MIN_PRIZE}
+            │   └── it should revert with {POOL_PRIZE_SETUP__PRIZE_TOO_SMALL} error
+            └── when prize is equal or above {MIN_PRIZE}
+                ├── it should call the {exactOutputSingle} function of the {SwapRouter} contract
+                ├── it should call the {awardDraw} function of the {DrawManager} contract
+                └── it should emit the {PrizeSetUp} event
