@@ -4,6 +4,7 @@ pragma solidity ^0.8.27;
 import {Test} from "forge-std/Test.sol";
 import {Pool} from "@lucky-me/Pool.sol";
 import {TwabController} from "@lucky-me/TwabController.sol";
+import {DrawManager} from "@lucky-me/DrawManager.sol";
 import {AavePoolMock} from "./mocks/AavePoolMock.sol";
 import {ERC20Mock} from "./mocks/ERC20Mock.sol";
 import {LinkMock} from "./mocks/LinkMock.sol";
@@ -18,6 +19,7 @@ abstract contract BaseTest is Test {
     AavePoolMock aavePool;
     Pool pool;
     TwabController twabController;
+    DrawManager drawManager;
     SwapRouterMock swapRouter;
     QuoterMock quoter;
     VRFWrapperMock vrfWrapper;
@@ -53,12 +55,16 @@ abstract contract BaseTest is Test {
             block.timestamp
         );
 
-        // Get twab controller
+        // Get twab controller & draw manager
         twabController = TwabController(pool.TWAB_CONTROLLER());
+        drawManager = DrawManager(pool.DRAW_MANAGER());
 
-        // Setup user account with USDC
+        // Set up user account with USDC
         usdc.mint(bob, 1_000_000e6);
         vm.prank(bob);
         usdc.approve(address(pool), 1_000_000e6);
+
+        // Set up swap router mock with LINK
+        link.mint(address(swapRouter), 1_000_000e18);
     }
 }
