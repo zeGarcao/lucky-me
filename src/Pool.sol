@@ -169,6 +169,7 @@ contract Pool is IPool, AccessControl {
         uint256 remainingBalance = USDC.balanceOf(address(this));
         if (remainingBalance > 0) {
             TWAB_CONTROLLER.increaseTotalSupply(remainingBalance);
+            USDC.approve(address(AAVE_POOL), remainingBalance);
             AAVE_POOL.supply(address(USDC), remainingBalance, address(this), 0);
         }
 
