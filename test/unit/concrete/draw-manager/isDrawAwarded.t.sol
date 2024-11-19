@@ -37,15 +37,15 @@ contract IsDrawAwarded_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IsDrawClosed_NoAwardedDraws() public whenCurrentOpenDrawIdBelow2 {
+    function test_IsDrawAwarded_NoAwardedDraws() public whenCurrentOpenDrawIdBelow2 {
         assertFalse(drawManager.isDrawAwarded(drawId));
     }
 
-    function test_IsDrawClosed_NotPrevious() public whenCurrentOpenDrawIdAtOrAbove2 whenDrawIdNotPrevious {
+    function test_IsDrawAwarded_NotPrevious() public whenCurrentOpenDrawIdAtOrAbove2 whenDrawIdNotPrevious {
         assertFalse(drawManager.isDrawAwarded(drawId));
     }
 
-    function test_IsDrawClosed_PreviousWithoutRandomnessFulfilled()
+    function test_IsDrawAwarded_PreviousWithoutRandomnessFulfilled()
         public
         whenCurrentOpenDrawIdAtOrAbove2
         whenDrawIdIsPrevious
@@ -54,7 +54,7 @@ contract IsDrawAwarded_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
         assertFalse(drawManager.isDrawAwarded(drawId));
     }
 
-    function test_IsDrawClosed_PreviousWithRandomnessFulfilled()
+    function test_IsDrawAwarded_PreviousWithRandomnessFulfilled()
         public
         whenCurrentOpenDrawIdAtOrAbove2
         whenDrawIdIsPrevious
