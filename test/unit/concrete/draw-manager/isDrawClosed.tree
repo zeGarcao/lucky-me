@@ -1,0 +1,11 @@
+isDrawClosed.t.sol
+├── when current open draw id below 2
+│   └── it should return false
+└── when current open draw id at or above 2
+    ├── when draw id is not the previous of the current open draw id
+    │   └── it should return false
+    └── when draw id is the previous of the current open draw id
+        ├── when randomness request is fulfilled for draw id
+        │   └── it should return false
+        └── when randomness request is not fulfilled for draw id
+            └── it should return true
