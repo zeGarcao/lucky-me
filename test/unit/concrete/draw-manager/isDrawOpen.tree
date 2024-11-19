@@ -1,0 +1,5 @@
+isDrawOpen.t.sol
+├── when draw id passed to the function is equal to the current draw id
+│   └── it should return true
+└── when draw id passed to the function is different from the current draw id
+    └── it should return false
