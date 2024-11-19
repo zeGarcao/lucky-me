@@ -1,0 +1,8 @@
+isDrawFinalized.t.sol
+├── when current open draw id below 3
+│   └── it should return false
+└── when current open draw id at or above 3
+    ├── when draw id is not older than the previous draw of the current draw
+    │   └── it should return false
+    └── when draw id is older than the previous draw of the current draw
+        └── it should return true
