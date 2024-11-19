@@ -4,7 +4,6 @@ pragma solidity ^0.8.27;
 import {DrawManager_Unit_Shared_Test} from "../../shared/DrawManager.t.sol";
 
 contract IsDrawOpen_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
-    uint256 drawId;
     // ================================== SETUP MODIFIERS ==================================
 
     modifier whenDrawIdEqualCurrentDrawId() {

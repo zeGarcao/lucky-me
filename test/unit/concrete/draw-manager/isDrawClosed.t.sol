@@ -5,7 +5,6 @@ import {DrawManager_Unit_Shared_Test} from "../../shared/DrawManager.t.sol";
 import {DRAW_DURATION} from "@lucky-me/utils/Constants.sol";
 
 contract IsDrawClosed_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
-    uint256 drawId;
     // ================================== SETUP MODIFIERS ==================================
 
     modifier whenCurrentOpenDrawIdBelow2() {
@@ -28,13 +27,7 @@ contract IsDrawClosed_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
     }
 
     modifier whenRandomnessRequestIsFulfilled() {
-        vrfWrapper.updateRequestPirce(0);
-        vm.prank(address(pool));
-        drawManager.awardDraw(drawId, 100e6);
-        uint256 requestId = vrfWrapper.lastRequestId();
-        uint256[] memory randomWords = new uint256[](1);
-        randomWords[0] = uint256(keccak256(abi.encode(requestId)));
-        vrfWrapper.fulfillRandomWords(address(drawManager), requestId, randomWords);
+        _awardDraw(drawId);
         _;
     }
 
