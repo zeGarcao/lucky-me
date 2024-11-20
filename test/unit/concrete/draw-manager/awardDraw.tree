@@ -1,0 +1,12 @@
+awardDraw.t.sol
+├── when caller is not the owner
+│   └── it should revert
+└── when caller is the owner
+    ├── when randomness request was already sent
+    │   └── it should revert with {DRAW_AWARD_DRAW__REQUEST_ALREADY_SENT} error
+    └── when randomness request was not already sent
+        ├── it should call the {transferAndCall} function of LINK token contract
+        ├── it should change the request status to {PENDING}
+        ├── it should store the prize for the draw
+        ├── it should store the request id made for the draw
+        └── it should emit the {RandomnessRequestSent} event
