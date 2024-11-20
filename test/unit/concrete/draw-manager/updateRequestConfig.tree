@@ -1,0 +1,13 @@
+updateRequestConfig.t.sol
+├── when caller is not the owner
+│   └── it should revert
+└── when caller is the owner
+    ├── when new callback gas limit is zero
+    │   └── it should revert with {DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT} error
+    └── when new callback gas limit is not zero
+        ├── when new request confirmations is zero
+        │   └── it should revert with {DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS} error
+        └── when new request confirmations is not zero
+            ├── it update callback gas limit of request config
+            ├── it update request confirmations of request config
+            └── it should emit the {RequestConfigUpdated} event
