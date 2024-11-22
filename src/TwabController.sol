@@ -9,7 +9,8 @@ import {
     BalanceDecreased,
     ObservationRecorded,
     TotalSupplyIncreased,
-    TotalSupplyDecreased
+    TotalSupplyDecreased,
+    BalanceCredited
 } from "@lucky-me/utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
@@ -22,7 +23,8 @@ import {
     TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY,
     TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
     TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
-    TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE
+    TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE,
+    TWAB_CREDIT_BALANCE__INVALID_AMOUNT
 } from "@lucky-me/utils/Errors.sol";
 
 // TODO documentation
@@ -85,36 +87,6 @@ contract TwabController is ITwabController, Ownable {
     }
 
     /// @inheritdoc ITwabController
-    function getTwabBetween(address _account, uint256 _startTime, uint256 _endTime) external view returns (uint256) {
-        // Reverts if start time is more recent than the end time.
-        require(_startTime <= _endTime, TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE());
-
-        AccountDetails memory account = _accounts[_account];
-
-        // Gets the observation recorded before or at the end timestamp.
-        Observation memory endObservation = _getPreviousOrAtObservation(account, _endTime);
-
-        // Returns the balance of `endObservation` if start and end times are the same.
-        if (_startTime == _endTime) return endObservation.balance;
-
-        // Gets the observation recorded before or at the start timestamp.
-        Observation memory startObservation = _getPreviousOrAtObservation(account, _startTime);
-
-        // Extrapolate balance of `startObservation` if its timestamp does not match the start timestamp.
-        if (startObservation.timestamp != _startTime) {
-            startObservation = _calculateTemporaryObservation(startObservation, _startTime);
-        }
-
-        // Extrapolate balance of `endObservation` if its timestamp does not match the end timestamp.
-        if (endObservation.timestamp != _endTime) {
-            endObservation = _calculateTemporaryObservation(endObservation, _endTime);
-        }
-
-        // Formula: Δ_amount / Δ_time
-        return (endObservation.cumulativeBalance - startObservation.cumulativeBalance) / (_endTime - _startTime);
-    }
-
-    /// @inheritdoc ITwabController
     function increaseTotalSupply(uint256 _amount) public onlyOwner returns (uint256) {
         // Reverts if increase amount is zero.
         require(_amount != 0, TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT());
@@ -149,6 +121,31 @@ contract TwabController is ITwabController, Ownable {
     }
 
     /// @inheritdoc ITwabController
+    function creditBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
+        // Reverts if credit amount is zero.
+        require(_amount != 0, TWAB_CREDIT_BALANCE__INVALID_AMOUNT());
+
+        // Credits the user's account with `amount`.
+        (uint256 newBalance, Observation memory observation, bool isNewObservation) =
+            _increaseBalance(_accounts[_account], _amount);
+
+        emit BalanceCredited(_account, _amount, newBalance, block.timestamp);
+        emit ObservationRecorded(_account, observation, isNewObservation);
+
+        return newBalance;
+    }
+
+    /// @inheritdoc ITwabController
+    function getTwabBetween(address _account, uint256 _startTime, uint256 _endTime) external view returns (uint256) {
+        return _getTwabBetween(_accounts[_account], _startTime, _endTime);
+    }
+
+    /// @inheritdoc ITwabController
+    function getTotalSupplyTwabBetween(uint256 _startTime, uint256 _endTime) external view returns (uint256) {
+        return _getTwabBetween(_totalSupplyAccount, _startTime, _endTime);
+    }
+
+    /// @inheritdoc ITwabController
     function getAccount(address _account) public view returns (AccountDetails memory) {
         return _accounts[_account];
     }
@@ -164,6 +161,45 @@ contract TwabController is ITwabController, Ownable {
     }
 
     /* ===================== Internal & Private Functions ===================== */
+
+    /**
+     * @notice Gets an account time-weighted average balance (TWAB) between two timestamps.
+     * @dev If timestamps in the range aren't exact matches of observations, balance is extrapolated using the previous observation.
+     * @param _account The target account.
+     * @param _startTime The start of the time range.
+     * @param _endTime The end of the time range.
+     * @return Account TWAB for the time range.
+     */
+    function _getTwabBetween(AccountDetails memory _account, uint256 _startTime, uint256 _endTime)
+        internal
+        view
+        returns (uint256)
+    {
+        // Reverts if start time is more recent than the end time.
+        require(_startTime <= _endTime, TWAB_TWAB_BETWEEN__INVALID_TIME_RANGE());
+
+        // Gets the observation recorded before or at the end timestamp.
+        Observation memory endObservation = _getPreviousOrAtObservation(_account, _endTime);
+
+        // Returns the balance of `endObservation` if start and end times are the same.
+        if (_startTime == _endTime) return endObservation.balance;
+
+        // Gets the observation recorded before or at the start timestamp.
+        Observation memory startObservation = _getPreviousOrAtObservation(_account, _startTime);
+
+        // Extrapolate balance of `startObservation` if its timestamp does not match the start timestamp.
+        if (startObservation.timestamp != _startTime) {
+            startObservation = _calculateTemporaryObservation(startObservation, _startTime);
+        }
+
+        // Extrapolate balance of `endObservation` if its timestamp does not match the end timestamp.
+        if (endObservation.timestamp != _endTime) {
+            endObservation = _calculateTemporaryObservation(endObservation, _endTime);
+        }
+
+        // Formula: Δ_amount / Δ_time
+        return (endObservation.cumulativeBalance - startObservation.cumulativeBalance) / (_endTime - _startTime);
+    }
 
     /**
      * @notice Increases a user's account balance and records the corresponding observation.

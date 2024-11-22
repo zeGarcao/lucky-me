@@ -50,6 +50,8 @@ error TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT();
 error TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT();
 /// @notice Raised when total supply is decrease by an amount that exceeds the available total supply.
 error TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE();
+/// @notice Raised when credit amount is zero.
+error TWAB_CREDIT_BALANCE__INVALID_AMOUNT();
 
 /* ===================================== DRAW MANAGER ERRORS ==================================== */
 

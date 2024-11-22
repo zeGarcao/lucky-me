@@ -24,7 +24,7 @@ import {
     POOL_PRIZE_SETUP__PRIZE_TOO_SMALL,
     POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS
 } from "@lucky-me/utils/Errors.sol";
-import {Deposited, Withdrawn, PrizeSetUp, KeeperUpdated} from "@lucky-me/utils/Events.sol";
+import {Deposited, Withdrawn, PrizeSetUp, KeeperUpdated, PrizeAwarded} from "@lucky-me/utils/Events.sol";
 import {MIN_DEPOSIT, OWNER_ROLE, KEEPER_ROLE, MIN_PRIZE, ONE_HUNDRED_PERCENT_BPS} from "@lucky-me/utils/Constants.sol";
 
 // TODO documentation
@@ -175,6 +175,36 @@ contract Pool is IPool, AccessControl {
         }
 
         emit PrizeSetUp(drawId, prize, block.timestamp);
+    }
+
+    /// @inheritdoc IPool
+    function claimPrize(uint256 _drawId) external returns (uint256 prize) {
+        // Gets the start and end period of the draw.
+        (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);
+
+        // Retrieves the user and pool twabs.
+        uint256 userTwab = TWAB_CONTROLLER.getTwabBetween(msg.sender, startTime, endTime);
+        uint256 poolTwab = TWAB_CONTROLLER.getTotalSupplyTwabBetween(startTime, endTime);
+
+        // Claims the prize.
+        prize = DRAW_MANAGER.claimPrize(_drawId, msg.sender, userTwab, poolTwab);
+
+        // Credits the prize to user's account.
+        uint256 newBalance = TWAB_CONTROLLER.creditBalance(msg.sender, prize);
+
+        emit PrizeAwarded(_drawId, msg.sender, prize, newBalance, block.timestamp);
+    }
+
+    /// @inheritdoc IPool
+    function isWinner(uint256 _drawId, address _user) public view returns (bool) {
+        // Gets the start and end times of the draw.
+        (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);
+
+        // Retrieves the user and pool twabs.
+        uint256 userTwab = TWAB_CONTROLLER.getTwabBetween(_user, startTime, endTime);
+        uint256 poolTwab = TWAB_CONTROLLER.getTotalSupplyTwabBetween(startTime, endTime);
+
+        return DRAW_MANAGER.isWinner(_drawId, _user, userTwab, poolTwab);
     }
 
     /* ===================== Internal & Private Functions ===================== */

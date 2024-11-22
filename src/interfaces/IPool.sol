@@ -41,6 +41,21 @@ interface IPool {
     function setUpPrize(uint24 _poolFee, uint256 _slippage) external;
 
     /**
+     * @notice Handles the prize claiming process for a specific draw id.
+     * @param _drawId Id of the draw.
+     * @return prize Prize claimed.
+     */
+    function claimPrize(uint256 _drawId) external returns (uint256 prize);
+
+    /**
+     * @notice Checks if a user is eligible to win the prize for a specific draw.
+     * @param _drawId Id of the draw.
+     * @param _user Address of the user.
+     * @return Flag indicating if the user is eligible or not.
+     */
+    function isWinner(uint256 _drawId, address _user) external view returns (bool);
+
+    /**
      * @notice Retrieves the address of the keeper.
      * @return Address of the keeper.
      */

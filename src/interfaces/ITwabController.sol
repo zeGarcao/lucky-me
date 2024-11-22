@@ -40,6 +40,15 @@ interface ITwabController {
     function decreaseTotalSupply(uint256 _amount) external returns (uint256);
 
     /**
+     * @notice Credits an amount to a user's account balance and records the corresponding observation.
+     * @dev This function must only be called by the owner.
+     * @param _account User address pointing to their account.
+     * @param _amount Credit amount.
+     * @return New user account balance.
+     */
+    function creditBalance(address _account, uint256 _amount) external returns (uint256);
+
+    /**
      * @notice Gets a user's time-weighted average balance (TWAB) between two timestamps.
      * @dev If timestamps in the range aren't exact matches of observations, balance is extrapolated using the previous observation.
      * @param _account User address pointing to their account.
@@ -48,6 +57,15 @@ interface ITwabController {
      * @return User TWAB for the time range.
      */
     function getTwabBetween(address _account, uint256 _startTime, uint256 _endTime) external view returns (uint256);
+
+    /**
+     * @notice Gets the total supply time-weighted average balance (TWAB) between two timestamps.
+     * @dev If timestamps in the range aren't exact matches of observations, balance is extrapolated using the previous observation.
+     * @param _startTime The start of the time range.
+     * @param _endTime The end of the time range.
+     * @return Total supply TWAB for the time range.
+     */
+    function getTotalSupplyTwabBetween(uint256 _startTime, uint256 _endTime) external view returns (uint256);
 
     /**
      * @notice Gets a user's account details.

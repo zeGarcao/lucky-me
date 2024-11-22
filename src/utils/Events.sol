@@ -118,3 +118,22 @@ event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint25
  * @param timestamp Timestamp when claiming took place.
  */
 event PrizeClaimed(uint256 drawId, address user, uint256 prize, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is successfully awarded to a user.
+ * @param drawId Id of the draw.
+ * @param winner Address of the winner.
+ * @param prize Prize awarded.
+ * @param balance User balance upon receiving the prize.
+ * @param timestamp Timestamp when claiming took place.
+ */
+event PrizeAwarded(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is credited to a user's account.
+ * @param account Address of the user.
+ * @param amount Amount credited to user's account.
+ * @param balance User's account balance after credit.
+ * @param timestamp Timestamp when claiming took place.
+ */
+event BalanceCredited(address account, uint256 amount, uint256 balance, uint256 timestamp);

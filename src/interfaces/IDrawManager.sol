@@ -16,12 +16,15 @@ interface IDrawManager {
     /**
      * @notice Tries to claim the prize of the last awarded draw.
      * @dev Must only be called by the owner.
+     * @param _drawId Id of the draw.
      * @param _user Address of the user that wants to claim the prize.
      * @param _userTwab Twab of the user.
      * @param _poolTwab Twab of the pool.
      * @return Prize claimed.
      */
-    function claimPrize(address _user, uint256 _userTwab, uint256 _poolTwab) external returns (uint256);
+    function claimPrize(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
+        external
+        returns (uint256);
 
     /**
      * @notice Updates Chainlink's request configuration.
@@ -52,6 +55,22 @@ interface IDrawManager {
         returns (bool);
 
     /**
+     * @notice Retrieves the start and end period for a specific draw.
+     * @param _drawId Id of the draw.
+     * @return startTime Start time of the draw.
+     * @return endTime End time of the draw.
+     */
+    function getDrawPeriod(uint256 _drawId) external view returns (uint256 startTime, uint256 endTime);
+
+    /**
+     * @notice Checks if a user has already claimed the prize for a specific draw id.
+     * @param _drawId Id of the draw.
+     * @param _user Address of the user.
+     * @return Flag indicanting if the user has already claimed the prize or not.
+     */
+    function claimed(uint256 _drawId, address _user) external view returns (bool);
+
+    /**
      * @notice Fetches the cost of the randomness request.
      * @return Randomness request cost.
      */
@@ -62,6 +81,12 @@ interface IDrawManager {
      * @return RequestConfig data structure.
      */
     function getRequestConfig() external view returns (RequestConfig memory);
+
+    /**
+     * @notice Retrieves the luck factor list.
+     * @return Luck factor list.
+     */
+    function getLuckFactor() external view returns (uint256[] memory);
 
     /**
      * @notice Retrieves the id of the current open draw.

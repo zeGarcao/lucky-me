@@ -45,11 +45,13 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     /// @notice Mapping that tracks draws by their ids.
     mapping(uint256 => Draw) private _draws;
 
-    mapping(uint256 => mapping(address => bool)) public claimed;
-    uint256[] private _luckFactor;
-
     /// @notice Configuration for randomness requests.
     RequestConfig private _requestConfig;
+    /// @notice List luck factor values.
+    uint256[] private _luckFactor;
+
+    /// @notice Mapping to check if a user has already claimed the prize for a specific draw id.
+    mapping(uint256 => mapping(address => bool)) public claimed;
 
     /* ===================== Constructor ===================== */
 
@@ -96,26 +98,29 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     /// @inheritdoc IDrawManager
-    function claimPrize(address _user, uint256 _userTwab, uint256 _poolTwab) external onlyOwner returns (uint256) {
-        // Gets the previous draw.
-        uint256 drawId = getCurrentOpenDrawId() - 1;
-        Draw storage draw = _draws[drawId];
+    function claimPrize(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
+        external
+        onlyOwner
+        returns (uint256)
+    {
+        // Gets the draw.
+        Draw storage draw = _draws[_drawId];
 
         // Reverts if the draw is not awarded yet.
-        require(isDrawAwarded(drawId), DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED());
+        require(isDrawAwarded(_drawId), DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED());
         // Reverts if the user already claimed the prize.
-        require(!claimed[drawId][_user], DRAW_CLAIM_PRIZE__ALREADY_CLAIMED());
+        require(!claimed[_drawId][_user], DRAW_CLAIM_PRIZE__ALREADY_CLAIMED());
         // Reverts if maximum number of claims for the draw was already reached.
         require(draw.claims < MAX_CLAIMS, DRAW_CLAIM_PRIZE__MAX_CLAIMS_REACHED());
         // Reverts if user is not eligible.
-        require(isWinner(drawId, _user, _userTwab, _poolTwab), DRAW_CLAIM_PRIZE__NOT_WINNER());
+        require(isWinner(_drawId, _user, _userTwab, _poolTwab), DRAW_CLAIM_PRIZE__NOT_WINNER());
 
         // Updates the number of claims and claimed status.
         draw.claims += 1;
-        claimed[drawId][_user] = true;
+        claimed[_drawId][_user] = true;
         uint256 prize = draw.prize;
 
-        emit PrizeClaimed(drawId, _user, prize, block.timestamp);
+        emit PrizeClaimed(_drawId, _user, prize, block.timestamp);
 
         return prize;
     }
@@ -152,6 +157,11 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
         view
         returns (bool)
     {
+        // Winner check is only possible for:
+        //      - Valid draw ids, meaning id > 0.
+        //      - Awarded or finalized draws.
+        if (_drawId == 0 || _drawId >= getCurrentOpenDrawId() || isDrawClosed(_drawId)) return false;
+
         // Gets the random number of the draw.
         uint256 drawRandomNumber = getRequest(getDraw(_drawId).requestId).randomNumber;
         // Computes the user pseudo random number.
@@ -165,6 +175,16 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     /// @inheritdoc IDrawManager
+    function getDrawPeriod(uint256 _drawId) public view returns (uint256 startTime, uint256 endTime) {
+        // Returns (0, 0) because there is no draw with id 0.
+        if (_drawId == 0) return (0, 0);
+
+        // Computes start and end times for the draw.
+        startTime = GENESIS_START_TIME * _drawId;
+        endTime = startTime + DRAW_DURATION;
+    }
+
+    /// @inheritdoc IDrawManager
     function getRandomnessRequestCost() public view returns (uint256) {
         return i_vrfV2PlusWrapper.calculateRequestPrice(_requestConfig.callbackGasLimit, 1);
     }
@@ -172,6 +192,11 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     /// @inheritdoc IDrawManager
     function getRequestConfig() public view returns (RequestConfig memory) {
         return _requestConfig;
+    }
+
+    /// @inheritdoc IDrawManager
+    function getLuckFactor() public view returns (uint256[] memory) {
+        return _luckFactor;
     }
 
     /// @inheritdoc IDrawManager
