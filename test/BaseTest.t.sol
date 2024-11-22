@@ -42,6 +42,22 @@ abstract contract BaseTest is Test {
         swapRouter = new SwapRouterMock(address(quoter));
         vrfWrapper = new VRFWrapperMock(address(link));
 
+        // Set luck factor list
+        uint256[] memory luckFactor = new uint256[](13);
+        luckFactor[0] = 1000;
+        luckFactor[1] = 1000;
+        luckFactor[2] = 1000;
+        luckFactor[3] = 5000;
+        luckFactor[4] = 5000;
+        luckFactor[5] = 5000;
+        luckFactor[6] = 5000;
+        luckFactor[7] = 10000;
+        luckFactor[8] = 10000;
+        luckFactor[9] = 10000;
+        luckFactor[10] = 10000;
+        luckFactor[11] = 10000;
+        luckFactor[12] = 15000;
+
         // Deploy Lucky Me pool
         vm.prank(owner);
         pool = new Pool(
@@ -52,7 +68,8 @@ abstract contract BaseTest is Test {
             address(vrfWrapper),
             address(swapRouter),
             address(quoter),
-            block.timestamp
+            block.timestamp,
+            luckFactor
         );
 
         // Get twab controller & draw manager
