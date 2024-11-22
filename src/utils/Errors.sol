@@ -55,9 +55,21 @@ error TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE();
 
 /// @notice Raised when an invalid start time for the genesis draw is passed to the draw manager constructor.
 error DRAW_INIT__INVALID_GENESIS_START_TIME();
+/// @notice Raised when an invalid luck factor list is passed to the draw manager constructor.
+error DRAW_INIT__INVALID_LUCK_FACTOR_LIST();
 /// @notice Raised when trying to request a random number more than once.
 error DRAW_AWARD_DRAW__REQUEST_ALREADY_SENT();
 /// @notice Raised when an invalid callback gas limit is given when updating the request configuration.
 error DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT();
 /// @notice Raised when an invalid number of request confirmations is given when updating the request configuration.
 error DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS();
+/// @notice Raised when trying to claim a prize of a not already awarded draw.
+error DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED();
+/// @notice Raised when trying to claim a prize more than once of the same draw.
+error DRAW_CLAIM_PRIZE__ALREADY_CLAIMED();
+/// @notice Raised when trying to claim a prize for a draw that already reached the maximum number of claims.
+error DRAW_CLAIM_PRIZE__MAX_CLAIMS_REACHED();
+/// @notice Raised when the user trying to claim a prize is not winner.
+error DRAW_CLAIM_PRIZE__NOT_WINNER();
+/// @notice Raised when an invalid luck factor list is given when updating the luck factor list.
+error DRAW_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR_LIST();

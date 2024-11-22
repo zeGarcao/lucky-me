@@ -101,3 +101,11 @@ event TotalSupplyIncreased(uint256 amount, uint256 totalSupply, uint256 timestam
  * @param timestamp Timestamp when the decrease took place.
  */
 event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever luck factor list is successfully updated.
+ * @param oldLuckFactor Old luck factor list.
+ * @param newLuckFactor New luck factor list.
+ * @param timestamp Timestamp of the updated.
+ */
+event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);

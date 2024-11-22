@@ -58,7 +58,8 @@ contract Pool is IPool, AccessControl {
         address _vrfWrapperAddress,
         address _swapRouterAddress,
         address _quoterAddress,
-        uint256 _startTime
+        uint256 _startTime,
+        uint256[] memory _luckFactor
     ) {
         require(_usdcAddress != address(0), POOL_INIT__INVALID_USDC_ADDRESS());
         require(_aavePoolAddress != address(0), POOL_INIT__INVALID_AAVE_POOL_ADDRESS());
@@ -74,7 +75,7 @@ contract Pool is IPool, AccessControl {
         QUOTER = IQuoter(_quoterAddress);
 
         TWAB_CONTROLLER = new TwabController(_startTime);
-        DRAW_MANAGER = new DrawManager(_startTime, _vrfWrapperAddress);
+        DRAW_MANAGER = new DrawManager(_startTime, _vrfWrapperAddress, _luckFactor);
 
         keeper = _keeperAddress;
 

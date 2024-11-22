@@ -14,12 +14,42 @@ interface IDrawManager {
     function awardDraw(uint256 _drawId, uint256 _prize) external;
 
     /**
+     * @notice Tries to claim the prize of the last awarded draw.
+     * @dev Must only be called by the owner.
+     * @param _user Address of the user that wants to claim the prize.
+     * @param _userTwab Twab of the user.
+     * @param _poolTwab Twab of the pool.
+     * @return Prize claimed.
+     */
+    function claimPrize(address _user, uint256 _userTwab, uint256 _poolTwab) external returns (uint256);
+
+    /**
      * @notice Updates Chainlink's request configuration.
      * @dev Must only be called by the owner.
      * @param _callbackGasLimit Limit of gas amount that can be consumed by the callback.
      * @param _requestConfirmations Number of confirmations for the randomness request.
      */
     function updateRequestConfig(uint32 _callbackGasLimit, uint16 _requestConfirmations) external;
+
+    /**
+     * @notice Updates luck factor list.
+     * @dev Must only be called by the owner.
+     * @param _luckFactorList New luck factor list.
+     */
+    function updateLuckFactor(uint256[] calldata _luckFactorList) external;
+
+    /**
+     * @notice Checks if a user is eligible to win a prize for a specific draw.
+     * @param _drawId Id of the draw.
+     * @param _user Address of the user.
+     * @param _userTwab Twab of the user.
+     * @param _poolTwab Twab of the pool.
+     * @return Flag indicating if the user is a winner or not.
+     */
+    function isWinner(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
+        public
+        view
+        returns (bool);
 
     /**
      * @notice Fetches the cost of the randomness request.

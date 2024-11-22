@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
+// TODO change this to a submodule of project
 /**
  * NOTE: There is a difference in meaning between "cardinality" and "count":
  *  - cardinality is the physical size of the ring buffer (i.e. max elements).

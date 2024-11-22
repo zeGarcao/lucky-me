@@ -21,3 +21,5 @@ bytes32 constant OWNER_ROLE = 0xb19546dff01e856fb3f010c267a7b1c60363cf8a4664e21c
 bytes32 constant KEEPER_ROLE = 0xfc8737ab85eb45125971625a9ebdb75cc78e01d5c1fa80c4c6e5203f47bc4fab;
 // One hundred percent in basis points.
 uint256 constant ONE_HUNDRED_PERCENT_BPS = 10_000;
+// Maximum number of prize claims for a draw.
+uint256 constant MAX_CLAIMS = 3;
