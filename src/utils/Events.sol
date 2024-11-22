@@ -109,3 +109,12 @@ event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestam
  * @param timestamp Timestamp of the updated.
  */
 event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is successfully claimed.
+ * @param drawId Id of the draw.
+ * @param user Address of the user.
+ * @param prize Prize claimed.
+ * @param timestamp Timestamp when claiming took place.
+ */
+event PrizeClaimed(uint256 drawId, address user, uint256 prize, uint256 timestamp);

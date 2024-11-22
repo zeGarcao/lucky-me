@@ -28,7 +28,8 @@ import {
     RandomnessRequestSent,
     RandomnessRequestFulFilled,
     RequestConfigUpdated,
-    LuckFactorUpdated
+    LuckFactorUpdated,
+    PrizeClaimed
 } from "@lucky-me/utils/Events.sol";
 import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 import {VRFV2PlusClient} from "@chainlink/vrf/dev/libraries/VRFV2PlusClient.sol";
@@ -112,8 +113,11 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
         // Updates the number of claims and claimed status.
         draw.claims += 1;
         claimed[drawId][_user] = true;
+        uint256 prize = draw.prize;
 
-        return draw.prize;
+        emit PrizeClaimed(drawId, _user, prize, block.timestamp);
+
+        return prize;
     }
 
     /// @inheritdoc IDrawManager

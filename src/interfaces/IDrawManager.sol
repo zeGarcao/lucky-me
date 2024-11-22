@@ -47,7 +47,7 @@ interface IDrawManager {
      * @return Flag indicating if the user is a winner or not.
      */
     function isWinner(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
-        public
+        external
         view
         returns (bool);
 
