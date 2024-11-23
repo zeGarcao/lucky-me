@@ -1,0 +1,7 @@
+getDrawPeriod.t.sol
+├── when draw id is zero
+│   ├── it should return 0 as draw start time
+│   └── it should return 0 as draw end time
+└── when draw id is not zero
+    ├── it should return the correct start time of the draw 
+    └── it should return the correct end time of the draw
