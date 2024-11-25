@@ -28,7 +28,6 @@ import {
 } from "@lucky-me/utils/Events.sol";
 import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 import {VRFV2PlusClient} from "@chainlink/vrf/dev/libraries/VRFV2PlusClient.sol";
-import {UniformRandomNumber} from "@lucky-me/libraries/UniformRandomNumber.sol";
 
 // TODO documentation
 contract DrawManager is IDrawManager, AccessControl, VRFV2PlusWrapperConsumerBase {
