@@ -16,16 +16,33 @@ import {
     POOL_INIT__INVALID_KEEPER_ADDRESS,
     POOL_INIT__INVALID_SWAP_ROUTER_ADDRESS,
     POOL_INIT__INVALID_QUOTER_ADDRESS,
+    POOL_INIT__INVALID_LUCK_FACTOR,
     POOL_DEPOSIT__INVALID_AMOUNT,
     POOL_WITHDRAW__INVALID_AMOUNT,
     POOL_WITHDRAW__INVALID_BALANCE,
     POOL_PRIZE_SETUP__DRAW_NOT_CLOSED,
     POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS,
     POOL_PRIZE_SETUP__PRIZE_TOO_SMALL,
-    POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS
+    POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS,
+    POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR,
+    POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE,
+    POOL_CLAIM_PRIZE__ALREADY_CLAIMED,
+    POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED,
+    POOL_CLAIM_PRIZE__NOT_ELIGIBLE
 } from "@lucky-me/utils/Errors.sol";
-import {Deposited, Withdrawn, PrizeSetUp, KeeperUpdated, PrizeAwarded} from "@lucky-me/utils/Events.sol";
-import {MIN_DEPOSIT, OWNER_ROLE, KEEPER_ROLE, MIN_PRIZE, ONE_HUNDRED_PERCENT_BPS} from "@lucky-me/utils/Constants.sol";
+import {
+    Deposited, Withdrawn, PrizeSet, KeeperUpdated, PrizeClaimed, LuckFactorUpdated
+} from "@lucky-me/utils/Events.sol";
+import {
+    MIN_DEPOSIT,
+    OWNER_ROLE,
+    KEEPER_ROLE,
+    MIN_PRIZE,
+    ONE_HUNDRED_PERCENT_BPS,
+    MAX_CLAIMS
+} from "@lucky-me/utils/Constants.sol";
+import {UniformRandomNumber} from "@lucky-me/libraries/UniformRandomNumber.sol";
+import {Prize} from "@lucky-me/utils/Structs.sol";
 
 // TODO documentation
 contract Pool is IPool, AccessControl {
@@ -44,6 +61,13 @@ contract Pool is IPool, AccessControl {
     /// @notice Instance of USDC token.
     IERC20 public immutable USDC;
 
+    /// @notice Mapping that tracks prize of each draw id.
+    mapping(uint256 => Prize) private _prizes;
+    /// @notice List of luck factors.
+    uint256[] private _luckFactor;
+
+    /// @notice Mapping that tracks claim status by user for each draw id.
+    mapping(uint256 => mapping(address => bool)) public claimed;
     /// @notice Address of the off-chain keeper responsible for setting up prizes.
     address public keeper;
 
@@ -59,7 +83,7 @@ contract Pool is IPool, AccessControl {
         address _swapRouterAddress,
         address _quoterAddress,
         uint256 _startTime,
-        uint256[] memory _luckFactor
+        uint256[] memory _luckFactorArr
     ) {
         require(_usdcAddress != address(0), POOL_INIT__INVALID_USDC_ADDRESS());
         require(_aavePoolAddress != address(0), POOL_INIT__INVALID_AAVE_POOL_ADDRESS());
@@ -67,6 +91,7 @@ contract Pool is IPool, AccessControl {
         require(_keeperAddress != address(0), POOL_INIT__INVALID_KEEPER_ADDRESS());
         require(_swapRouterAddress != address(0), POOL_INIT__INVALID_SWAP_ROUTER_ADDRESS());
         require(_quoterAddress != address(0), POOL_INIT__INVALID_QUOTER_ADDRESS());
+        require(_luckFactorArr.length != 0, POOL_INIT__INVALID_LUCK_FACTOR());
 
         USDC = IERC20(_usdcAddress);
         AAVE_POOL = IAavePool(_aavePoolAddress);
@@ -75,9 +100,10 @@ contract Pool is IPool, AccessControl {
         QUOTER = IQuoter(_quoterAddress);
 
         TWAB_CONTROLLER = new TwabController(_startTime);
-        DRAW_MANAGER = new DrawManager(_startTime, _vrfWrapperAddress, _luckFactor);
+        DRAW_MANAGER = new DrawManager(_startTime, _vrfWrapperAddress, msg.sender);
 
         keeper = _keeperAddress;
+        _luckFactor = _luckFactorArr;
 
         _grantRole(OWNER_ROLE, msg.sender);
         _grantRole(KEEPER_ROLE, _keeperAddress);
@@ -137,12 +163,17 @@ contract Pool is IPool, AccessControl {
     }
 
     /// @inheritdoc IPool
-    function setUpPrize(uint24 _poolFee, uint256 _slippage) external onlyRole(KEEPER_ROLE) {
-        // Get the id of the draw for which the prize needs to be set up.
-        uint256 drawId = DRAW_MANAGER.getCurrentOpenDrawId() - 1;
-        // Revert if the draw is not closed.
-        require(DRAW_MANAGER.isDrawClosed(drawId), POOL_PRIZE_SETUP__DRAW_NOT_CLOSED());
+    function updateLuckFactor(uint256[] calldata _luckFactorArr) external onlyRole(OWNER_ROLE) {
+        require(_luckFactorArr.length != 0, POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR());
 
+        uint256[] memory oldLuckFactor = _luckFactor;
+        _luckFactor = _luckFactorArr;
+
+        emit LuckFactorUpdated(oldLuckFactor, _luckFactorArr, block.timestamp);
+    }
+
+    /// @inheritdoc IPool
+    function setPrize(uint256 _drawId, uint24 _poolFee, uint256 _slippage) external onlyRole(KEEPER_ROLE) {
         // Compute the generated yield from Aave.
         uint256 yield = A_USDC.balanceOf(address(this)) - TWAB_CONTROLLER.getTotalSupply();
         // Get the cost of the randomness request.
@@ -154,7 +185,7 @@ contract Pool is IPool, AccessControl {
         require(yield > usdcAmountIn, POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS());
 
         // Compute the prize for the draw.
-        uint256 prize = yield - usdcAmountIn;
+        uint256 prize = (yield - usdcAmountIn) / MAX_CLAIMS;
         // Ensure there is a sufficient prize amount.
         require(prize >= MIN_PRIZE, POOL_PRIZE_SETUP__PRIZE_TOO_SMALL());
 
@@ -164,7 +195,7 @@ contract Pool is IPool, AccessControl {
 
         // Swap USDC for LINK and call DrawManager to award the draw.
         _swapUsdcForLink(_poolFee, randomnessRequestCost, usdcAmountIn);
-        DRAW_MANAGER.awardDraw(drawId, prize);
+        DRAW_MANAGER.awardDraw(_drawId);
 
         // Supply to Aave and increase total supply in twab controller if there is a remaining balance.
         uint256 remainingBalance = USDC.balanceOf(address(this));
@@ -174,37 +205,70 @@ contract Pool is IPool, AccessControl {
             AAVE_POOL.supply(address(USDC), remainingBalance, address(this), 0);
         }
 
-        emit PrizeSetUp(drawId, prize, block.timestamp);
+        // Sets the prize amount for the draw.
+        _prizes[_drawId].amount = prize;
+
+        emit PrizeSet(_drawId, prize, block.timestamp);
     }
 
     /// @inheritdoc IPool
-    function claimPrize(uint256 _drawId) external returns (uint256 prize) {
-        // Gets the start and end period of the draw.
-        (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);
+    function claimPrize() external {
+        // Retrieves the previous draw id and its corresponding prize.
+        uint256 drawId = DRAW_MANAGER.getCurrentOpenDrawId() - 1;
+        Prize storage prize = _prizes[drawId];
 
-        // Retrieves the user and pool twabs.
-        uint256 userTwab = TWAB_CONTROLLER.getTwabBetween(msg.sender, startTime, endTime);
-        uint256 poolTwab = TWAB_CONTROLLER.getTotalSupplyTwabBetween(startTime, endTime);
+        // Reverts if draw is not awarded yet.
+        require(DRAW_MANAGER.isDrawAwarded(drawId), POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE());
+        // Reverts if the user already claimed the prize.
+        require(!claimed[drawId][msg.sender], POOL_CLAIM_PRIZE__ALREADY_CLAIMED());
+        // Reverts if maximum number of claims was already reached.
+        require(prize.claims < MAX_CLAIMS, POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED());
+        // Reverts if user is not eligible to claim the prize.
+        require(isWinner(drawId, msg.sender), POOL_CLAIM_PRIZE__NOT_ELIGIBLE());
 
-        // Claims the prize.
-        prize = DRAW_MANAGER.claimPrize(_drawId, msg.sender, userTwab, poolTwab);
+        // Records that the user claimed the prize and increases the number of claims.
+        claimed[drawId][msg.sender] = true;
+        prize.claims += 1;
+        uint256 prizeAmount = prize.amount;
 
-        // Credits the prize to user's account.
-        uint256 newBalance = TWAB_CONTROLLER.creditBalance(msg.sender, prize);
+        // Credits the prize to the user's account.
+        uint256 newBalance = TWAB_CONTROLLER.creditBalance(msg.sender, prizeAmount);
 
-        emit PrizeAwarded(_drawId, msg.sender, prize, newBalance, block.timestamp);
+        emit PrizeClaimed(drawId, msg.sender, prizeAmount, newBalance, block.timestamp);
     }
 
     /// @inheritdoc IPool
     function isWinner(uint256 _drawId, address _user) public view returns (bool) {
-        // Gets the start and end times of the draw.
+        // No winner if draw is open or closed.
+        if (DRAW_MANAGER.isDrawOpen(_drawId) || DRAW_MANAGER.isDrawClosed(_drawId)) return false;
+
+        // Retrieves the start and end times of the draw.
         (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);
+        // Retrieves the random number of the draw.
+        uint256 drawRandomNumber = DRAW_MANAGER.getDrawRandomNumber(_drawId);
 
         // Retrieves the user and pool twabs.
-        uint256 userTwab = TWAB_CONTROLLER.getTwabBetween(_user, startTime, endTime);
         uint256 poolTwab = TWAB_CONTROLLER.getTotalSupplyTwabBetween(startTime, endTime);
+        uint256 userTwab = TWAB_CONTROLLER.getTwabBetween(_user, startTime, endTime);
 
-        return DRAW_MANAGER.isWinner(_drawId, _user, userTwab, poolTwab);
+        // Computes the user pseudo random number.
+        uint256 userPRN = uint256(keccak256(abi.encode(_drawId, drawRandomNumber, _user)));
+        // Retrieves the user luck factor.
+        uint256 luckFactor = _luckFactor[UniformRandomNumber.uniform(userPRN, _luckFactor.length)];
+        // Computes the winning zone.
+        uint256 winningZone = (userTwab * luckFactor) / ONE_HUNDRED_PERCENT_BPS;
+
+        return UniformRandomNumber.uniform(userPRN, poolTwab) < winningZone;
+    }
+
+    /// @inheritdoc IPool
+    function getDrawPrize(uint256 _drawId) public view returns (Prize memory) {
+        return _prizes[_drawId];
+    }
+
+    /// @inheritdoc IPool
+    function getLuckFactor() public view returns (uint256[] memory) {
+        return _luckFactor;
     }
 
     /* ===================== Internal & Private Functions ===================== */

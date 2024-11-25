@@ -31,15 +31,13 @@ struct AccountDetails {
 }
 
 /**
- * @notice Data structure to store information of each draw.
- * @param requestId Id of the randomness request associated with the draw.
- * @param claims Number of prize claims for the draw.
- * @param prize Prize assigned to the draw.
+ * @notice Data structure to store prize information of each draw.
+ * @param amount Prize amount.
+ * @param claims Number of prize claims.
  */
-struct Draw {
-    uint256 requestId;
+struct Prize {
+    uint256 amount;
     uint256 claims;
-    uint256 prize;
 }
 
 /**

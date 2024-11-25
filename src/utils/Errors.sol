@@ -15,6 +15,10 @@ error POOL_INIT__INVALID_KEEPER_ADDRESS();
 error POOL_INIT__INVALID_SWAP_ROUTER_ADDRESS();
 /// @notice Raised when an invalid UniswapV3 quoter address is passed to the pool constructor.
 error POOL_INIT__INVALID_QUOTER_ADDRESS();
+/// @notice Raised when an invalid luck factor list is passed to the pool constructor.
+error POOL_INIT__INVALID_LUCK_FACTOR();
+/// @notice Raised when an invalid luck factor list is given when updating it.
+error POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR();
 /// @notice Raised when a user tries to deposit into the pool an amount below the minimum required.
 error POOL_DEPOSIT__INVALID_AMOUNT();
 /// @notice Raised when a user tries to withdraw zero USDC from the pool.
@@ -29,6 +33,14 @@ error POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS();
 error POOL_PRIZE_SETUP__PRIZE_TOO_SMALL();
 /// @notice Raised when an invalid keeper is given when updating keeper.
 error POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS();
+/// @notice Raised when trying to claim prize which is not claimable yet.
+error POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE();
+/// @notice Raised when trying to claim a prize more than once.
+error POOL_CLAIM_PRIZE__ALREADY_CLAIMED();
+/// @notice Raised when maximum number of prize claims is reached.
+error POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED();
+/// @notice Raised when user is not eligible to claim the prize.
+error POOL_CLAIM_PRIZE__NOT_ELIGIBLE();
 
 /* ===================================== TWAB ERRORS ==================================== */
 
@@ -57,21 +69,13 @@ error TWAB_CREDIT_BALANCE__INVALID_AMOUNT();
 
 /// @notice Raised when an invalid start time for the genesis draw is passed to the draw manager constructor.
 error DRAW_INIT__INVALID_GENESIS_START_TIME();
-/// @notice Raised when an invalid luck factor list is passed to the draw manager constructor.
-error DRAW_INIT__INVALID_LUCK_FACTOR_LIST();
-/// @notice Raised when trying to request a random number more than once.
-error DRAW_AWARD_DRAW__REQUEST_ALREADY_SENT();
+/// @notice Raised when an invalid admin address is passed to the draw manager constructor.
+error DRAW_INIT__INVALID_ADMIN();
+/// @notice Raised when an invalid admin (address(0) or same as current) is passed to the update admin function.
+error DRAW_UPDATE_ADMIN__INVALID_ADMIN();
+/// @notice Raised when trying to award a draw that is not closed.
+error DRAW_AWARD_DRAW__DRAW_NOT_CLOSED();
 /// @notice Raised when an invalid callback gas limit is given when updating the request configuration.
 error DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT();
 /// @notice Raised when an invalid number of request confirmations is given when updating the request configuration.
 error DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS();
-/// @notice Raised when trying to claim a prize of a not already awarded draw.
-error DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED();
-/// @notice Raised when trying to claim a prize more than once of the same draw.
-error DRAW_CLAIM_PRIZE__ALREADY_CLAIMED();
-/// @notice Raised when trying to claim a prize for a draw that already reached the maximum number of claims.
-error DRAW_CLAIM_PRIZE__MAX_CLAIMS_REACHED();
-/// @notice Raised when the user trying to claim a prize is not winner.
-error DRAW_CLAIM_PRIZE__NOT_WINNER();
-/// @notice Raised when an invalid luck factor list is given when updating the luck factor list.
-error DRAW_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR_LIST();

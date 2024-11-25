@@ -14,7 +14,7 @@ abstract contract DrawManager_Unit_Shared_Test is BaseTest {
 
     function _awardDraw(uint256 _drawId) internal {
         vm.prank(address(pool));
-        drawManager.awardDraw(_drawId, 100e6);
+        drawManager.awardDraw(_drawId);
 
         uint256 requestId = vrfWrapper.lastRequestId();
         uint256[] memory randomWords = new uint256[](1);

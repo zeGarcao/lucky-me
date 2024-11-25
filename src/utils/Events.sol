@@ -76,7 +76,7 @@ event RequestConfigUpdated(uint32 callbackGasLimit, uint16 requestConfirmations,
  * @param prize Prize assigned to the draw.
  * @param timestamp Timestamp of prize setup.
  */
-event PrizeSetUp(uint256 indexed drawId, uint256 prize, uint256 timestamp);
+event PrizeSet(uint256 indexed drawId, uint256 prize, uint256 timestamp);
 
 /**
  * @notice Emitted whenever the keeper is updated.
@@ -103,23 +103,6 @@ event TotalSupplyIncreased(uint256 amount, uint256 totalSupply, uint256 timestam
 event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
 
 /**
- * @notice Emitted whenever luck factor list is successfully updated.
- * @param oldLuckFactor Old luck factor list.
- * @param newLuckFactor New luck factor list.
- * @param timestamp Timestamp of the updated.
- */
-event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);
-
-/**
- * @notice Emitted whenever a prize is successfully claimed.
- * @param drawId Id of the draw.
- * @param user Address of the user.
- * @param prize Prize claimed.
- * @param timestamp Timestamp when claiming took place.
- */
-event PrizeClaimed(uint256 drawId, address user, uint256 prize, uint256 timestamp);
-
-/**
  * @notice Emitted whenever a prize is successfully awarded to a user.
  * @param drawId Id of the draw.
  * @param winner Address of the winner.
@@ -127,7 +110,7 @@ event PrizeClaimed(uint256 drawId, address user, uint256 prize, uint256 timestam
  * @param balance User balance upon receiving the prize.
  * @param timestamp Timestamp when claiming took place.
  */
-event PrizeAwarded(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
+event PrizeClaimed(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
 
 /**
  * @notice Emitted whenever a prize is credited to a user's account.
@@ -137,3 +120,19 @@ event PrizeAwarded(uint256 drawId, address winner, uint256 prize, uint256 balanc
  * @param timestamp Timestamp when claiming took place.
  */
 event BalanceCredited(address account, uint256 amount, uint256 balance, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the admin is updated.
+ * @param oldAdmin Address of the old admin.
+ * @param newAdmin Address of the new admin.
+ * @param timestamp Timestamp of the update.
+ */
+event AdminUpdated(address oldAdmin, address newAdmin, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the luck factor list is updated.
+ * @param oldLuckFactor Old luck factor list.
+ * @param newLuckFactor New luck factor list.
+ * @param timestamp Timestamp of the update.
+ */
+event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);

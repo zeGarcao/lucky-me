@@ -7,6 +7,7 @@ import {DrawManager} from "@lucky-me/DrawManager.sol";
 import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
 import {ISwapRouter} from "@lucky-me/interfaces/ISwapRouter.sol";
 import {IQuoter} from "@lucky-me/interfaces/IQuoter.sol";
+import {Prize} from "@lucky-me/utils/Structs.sol";
 
 // TODO documentation
 interface IPool {
@@ -30,22 +31,28 @@ interface IPool {
     function updateKeeper(address _keeperAddress) external;
 
     /**
+     * @notice Updates the luck factor list.
+     * @dev Must only be called by the owner.
+     * @param _luckFactorArr New luck factor list.
+     */
+    function updateLuckFactor(uint256[] calldata _luckFactorArr) external;
+
+    /**
      * @notice Sets up the weekly prize of a draw.
      *         1. Computes the generated yield since the begining of the draw.
      *         2. Takes a share of the yield to swap it for LINK to cover randomness generation costs from Chainlink.
-     *         3. Calls the draw manager to set up the draw for prize claiming.
+     *         3. Award the draw with its random number.
      * @dev Must only be called by the keeper.
+     * @param _drawId Id of the draw for which to define the prize.
      * @param _poolFee Fee of the UniswapV3 LINK/USDC pool.
      * @param _slippage Amount of slippage for the swap.
      */
-    function setUpPrize(uint24 _poolFee, uint256 _slippage) external;
+    function setPrize(uint256 _drawId, uint24 _poolFee, uint256 _slippage) external;
 
     /**
-     * @notice Handles the prize claiming process for a specific draw id.
-     * @param _drawId Id of the draw.
-     * @return prize Prize claimed.
+     * @notice Handles the prize claiming process for the previous awarded draw.
      */
-    function claimPrize(uint256 _drawId) external returns (uint256 prize);
+    function claimPrize() external;
 
     /**
      * @notice Checks if a user is eligible to win the prize for a specific draw.
@@ -60,6 +67,27 @@ interface IPool {
      * @return Address of the keeper.
      */
     function keeper() external view returns (address);
+
+    /**
+     * @notice Retrieves if a user claimed the prize of a specific draw id.
+     * @param _drawId Id of the draw.
+     * @param _user Address of the user.
+     * @return Flag indicating if user already claimed the prize or not.
+     */
+    function claimed(uint256 _drawId, address _user) external view returns (bool);
+
+    /**
+     * @notice Retrieves the prize data structure of a specific draw id.
+     * @param _drawId Id of the draw.
+     * @return Prize data of the draw.
+     */
+    function getDrawPrize(uint256 _drawId) external view returns (Prize memory);
+
+    /**
+     * @notice Retrieves the luck factor list.
+     * @return Luck factor list.
+     */
+    function getLuckFactor() external view returns (uint256[] memory);
 
     /**
      * @notice Retrives the TwabController instance.

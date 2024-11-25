@@ -1,58 +1,51 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {Draw, Request, RequestConfig} from "@lucky-me/utils/Structs.sol";
+import {Request, RequestConfig} from "@lucky-me/utils/Structs.sol";
 
 // TODO documentation
 interface IDrawManager {
     /**
-     * @notice Awards a draw with a prize and random number.
-     * @dev Must only be called by the owner.
+     * @notice Awards a draw with a random number.
+     * @dev Must be called only by address with OWNER_ROLE role.
      * @param _drawId Id of the draw to be awarded.
-     * @param _prize Prize amount to award the draw.
      */
-    function awardDraw(uint256 _drawId, uint256 _prize) external;
-
-    /**
-     * @notice Tries to claim the prize of the last awarded draw.
-     * @dev Must only be called by the owner.
-     * @param _drawId Id of the draw.
-     * @param _user Address of the user that wants to claim the prize.
-     * @param _userTwab Twab of the user.
-     * @param _poolTwab Twab of the pool.
-     * @return Prize claimed.
-     */
-    function claimPrize(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
-        external
-        returns (uint256);
+    function awardDraw(uint256 _drawId) external;
 
     /**
      * @notice Updates Chainlink's request configuration.
-     * @dev Must only be called by the owner.
+     * @dev Must be called only by address with ADMIN_ROLE role.
      * @param _callbackGasLimit Limit of gas amount that can be consumed by the callback.
      * @param _requestConfirmations Number of confirmations for the randomness request.
      */
     function updateRequestConfig(uint32 _callbackGasLimit, uint16 _requestConfirmations) external;
 
     /**
-     * @notice Updates luck factor list.
-     * @dev Must only be called by the owner.
-     * @param _luckFactorList New luck factor list.
+     * @notice Updates the admin address.
+     * @dev Must be called only by address with ADMIN_ROLE role.
+     * @param _admin Address of new admin.
      */
-    function updateLuckFactor(uint256[] calldata _luckFactorList) external;
+    function updateAdmin(address _admin) external;
 
     /**
-     * @notice Checks if a user is eligible to win a prize for a specific draw.
+     * @notice Retrieves the draw random number.
      * @param _drawId Id of the draw.
-     * @param _user Address of the user.
-     * @param _userTwab Twab of the user.
-     * @param _poolTwab Twab of the pool.
-     * @return Flag indicating if the user is a winner or not.
+     * @return Random number of the draw.
      */
-    function isWinner(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
-        external
-        view
-        returns (bool);
+    function getDrawRandomNumber(uint256 _drawId) external view returns (uint256);
+
+    /**
+     * @notice Retrieves request id of a specific draw id.
+     * @param _drawId Id of the draw.
+     * @return Id of randomness request.
+     */
+    function drawToRequestId(uint256 _drawId) external view returns (uint256);
+
+    /**
+     * @notice Retrieves the address of the admin.
+     * @return Address of the admin.
+     */
+    function admin() external view returns (address);
 
     /**
      * @notice Retrieves the start and end period for a specific draw.
@@ -61,14 +54,6 @@ interface IDrawManager {
      * @return endTime End time of the draw.
      */
     function getDrawPeriod(uint256 _drawId) external view returns (uint256 startTime, uint256 endTime);
-
-    /**
-     * @notice Checks if a user has already claimed the prize for a specific draw id.
-     * @param _drawId Id of the draw.
-     * @param _user Address of the user.
-     * @return Flag indicanting if the user has already claimed the prize or not.
-     */
-    function claimed(uint256 _drawId, address _user) external view returns (bool);
 
     /**
      * @notice Fetches the cost of the randomness request.
@@ -83,24 +68,10 @@ interface IDrawManager {
     function getRequestConfig() external view returns (RequestConfig memory);
 
     /**
-     * @notice Retrieves the luck factor list.
-     * @return Luck factor list.
-     */
-    function getLuckFactor() external view returns (uint256[] memory);
-
-    /**
      * @notice Retrieves the id of the current open draw.
      * @return Id of current open draw.
      */
     function getCurrentOpenDrawId() external view returns (uint256);
-
-    /**
-     * @notice Retrieves the draw with id `_drawId`.
-     * @dev Id starts at 1.
-     * @param _drawId Id of the draw.
-     * @return Draw data structure.
-     */
-    function getDraw(uint256 _drawId) external view returns (Draw memory);
 
     /**
      * @notice Retrieves the request with id `_requestId`.

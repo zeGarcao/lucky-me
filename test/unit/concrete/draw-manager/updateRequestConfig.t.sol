@@ -15,13 +15,13 @@ contract UpdateRequestConfig_Unit_Concrete_Test is DrawManager_Unit_Shared_Test 
     uint16 requestConfirmations;
     // ================================== SETUP MODIFIERS ==================================
 
-    modifier whenCallerIsNotOwner() {
+    modifier whenCallerDoesNotHaveAdminRole() {
         vm.startPrank(rando);
         _;
     }
 
-    modifier whenCallerIsOwner() {
-        vm.startPrank(address(pool));
+    modifier whenCallerHasAdminRole() {
+        vm.startPrank(address(owner));
         _;
     }
 
@@ -47,13 +47,13 @@ contract UpdateRequestConfig_Unit_Concrete_Test is DrawManager_Unit_Shared_Test 
 
     // =================================== UNHAPPY TESTS ===================================
 
-    function test_RevertWhen_NotOwner() public whenCallerIsNotOwner {
-        // Expect revert since caller is not the owner.
+    function test_RevertWhen_NotAdmin() public whenCallerDoesNotHaveAdminRole {
+        // Expect revert since caller does not have `ADMIN_ROLE` role.
         vm.expectRevert();
         drawManager.updateRequestConfig(callbackGasLimit, requestConfirmations);
     }
 
-    function test_RevertWhen_CallbackGasLimitIsZero() public whenCallerIsOwner whenCallbackGasLimitIsZero {
+    function test_RevertWhen_CallbackGasLimitIsZero() public whenCallerHasAdminRole whenCallbackGasLimitIsZero {
         // Expect revert with `DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT` error.
         vm.expectRevert(DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT.selector);
         drawManager.updateRequestConfig(callbackGasLimit, requestConfirmations);
@@ -61,7 +61,7 @@ contract UpdateRequestConfig_Unit_Concrete_Test is DrawManager_Unit_Shared_Test 
 
     function test_RevertWhen_RequestConfirmationsIsZero()
         public
-        whenCallerIsOwner
+        whenCallerHasAdminRole
         whenCallbackGasLimitIsNotZero
         whenRequestConfirmationsIsZero
     {
@@ -74,7 +74,7 @@ contract UpdateRequestConfig_Unit_Concrete_Test is DrawManager_Unit_Shared_Test 
 
     function test_UpdateRequestConfig_StoreNewConfig()
         public
-        whenCallerIsOwner
+        whenCallerHasAdminRole
         whenCallbackGasLimitIsNotZero
         whenRequestConfirmationsIsNotZero
     {

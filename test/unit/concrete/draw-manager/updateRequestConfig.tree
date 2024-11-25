@@ -1,7 +1,7 @@
 updateRequestConfig.t.sol
-├── when caller is not the owner
+├── when caller does not have `ADMIN_ROLE` role
 │   └── it should revert
-└── when caller is the owner
+└── when caller has `ADMIN_ROLE` role
     ├── when new callback gas limit is zero
     │   └── it should revert with {DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT} error
     └── when new callback gas limit is not zero

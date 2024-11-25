@@ -1,83 +1,76 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.27;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IDrawManager} from "@lucky-me/interfaces/IDrawManager.sol";
 import {
     DRAW_INIT__INVALID_GENESIS_START_TIME,
-    DRAW_INIT__INVALID_LUCK_FACTOR_LIST,
-    DRAW_AWARD_DRAW__REQUEST_ALREADY_SENT,
+    DRAW_INIT__INVALID_ADMIN,
+    DRAW_UPDATE_ADMIN__INVALID_ADMIN,
+    DRAW_AWARD_DRAW__DRAW_NOT_CLOSED,
     DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT,
-    DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS,
-    DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED,
-    DRAW_CLAIM_PRIZE__ALREADY_CLAIMED,
-    DRAW_CLAIM_PRIZE__MAX_CLAIMS_REACHED,
-    DRAW_CLAIM_PRIZE__NOT_WINNER,
-    DRAW_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR_LIST
+    DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS
 } from "@lucky-me/utils/Errors.sol";
 import {
     DRAW_DURATION,
     DEFAULT_CALLBACK_GAS_LIMIT,
     DEFAULT_REQUEST_CONFIRMATIONS,
-    ONE_HUNDRED_PERCENT_BPS,
-    MAX_CLAIMS
+    ADMIN_ROLE,
+    OWNER_ROLE
 } from "@lucky-me/utils/Constants.sol";
 import {RequestStatus} from "@lucky-me/utils/Enums.sol";
-import {Draw, Request, RequestConfig} from "@lucky-me/utils/Structs.sol";
+import {Request, RequestConfig} from "@lucky-me/utils/Structs.sol";
 import {
     RandomnessRequestSent,
     RandomnessRequestFulFilled,
     RequestConfigUpdated,
-    LuckFactorUpdated,
-    PrizeClaimed
+    AdminUpdated
 } from "@lucky-me/utils/Events.sol";
 import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 import {VRFV2PlusClient} from "@chainlink/vrf/dev/libraries/VRFV2PlusClient.sol";
 import {UniformRandomNumber} from "@lucky-me/libraries/UniformRandomNumber.sol";
 
 // TODO documentation
-contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
+contract DrawManager is IDrawManager, AccessControl, VRFV2PlusWrapperConsumerBase {
     /// @notice Genesis draw start time.
     uint256 public immutable GENESIS_START_TIME;
 
     /// @notice Mapping that tracks randomness requests by their ids.
     mapping(uint256 => Request) private _requests;
-    /// @notice Mapping that tracks draws by their ids.
-    mapping(uint256 => Draw) private _draws;
 
     /// @notice Configuration for randomness requests.
     RequestConfig private _requestConfig;
-    /// @notice List luck factor values.
-    uint256[] private _luckFactor;
 
-    /// @notice Mapping to check if a user has already claimed the prize for a specific draw id.
-    mapping(uint256 => mapping(address => bool)) public claimed;
+    /// @notice Mapping that tracks request ids by draw id.
+    mapping(uint256 => uint256) public drawToRequestId;
+    /// @notice Address of draw manager admin.
+    address public admin;
 
     /* ===================== Constructor ===================== */
 
     // TODO documentation
-    constructor(uint256 _genesisStartTime, address _wrapperAddress, uint256[] memory _luckFactorList)
-        Ownable(msg.sender)
+    constructor(uint256 _genesisStartTime, address _wrapperAddress, address _admin)
         VRFV2PlusWrapperConsumerBase(_wrapperAddress)
     {
         require(_genesisStartTime >= block.timestamp, DRAW_INIT__INVALID_GENESIS_START_TIME());
-        require(_luckFactorList.length != 0, DRAW_INIT__INVALID_LUCK_FACTOR_LIST());
+        require(_admin != address(0), DRAW_INIT__INVALID_ADMIN());
 
         GENESIS_START_TIME = _genesisStartTime;
-        _luckFactor = _luckFactorList;
         _requestConfig = RequestConfig({
             callbackGasLimit: DEFAULT_CALLBACK_GAS_LIMIT,
             requestConfirmations: DEFAULT_REQUEST_CONFIRMATIONS
         });
+
+        _grantRole(OWNER_ROLE, msg.sender);
+        _grantRole(ADMIN_ROLE, _admin);
     }
 
     /* ===================== Public & External Functions ===================== */
 
     /// @inheritdoc IDrawManager
-    function awardDraw(uint256 _drawId, uint256 _prize) external onlyOwner {
-        Draw storage draw = _draws[_drawId];
-        // Reverts if randomness request was already sent for the draw.
-        require(_requests[draw.requestId].status == RequestStatus.NOT_SENT, DRAW_AWARD_DRAW__REQUEST_ALREADY_SENT());
+    function awardDraw(uint256 _drawId) external onlyRole(OWNER_ROLE) {
+        // Reverts if draw is not closed
+        require(isDrawClosed(_drawId), DRAW_AWARD_DRAW__DRAW_NOT_CLOSED());
 
         // Requests a random number from Chainlink.
         (uint256 requestId,) = requestRandomness(
@@ -90,43 +83,17 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
         // Marks the request as pending.
         _requests[requestId].status = RequestStatus.PENDING;
 
-        // Sets the prize and assigns the request id to the draw.
-        draw.prize = _prize;
-        draw.requestId = requestId;
+        // Assigns the request id to the draw.
+        drawToRequestId[_drawId] = requestId;
 
         emit RandomnessRequestSent(requestId, _drawId, block.timestamp);
     }
 
     /// @inheritdoc IDrawManager
-    function claimPrize(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
+    function updateRequestConfig(uint32 _callbackGasLimit, uint16 _requestConfirmations)
         external
-        onlyOwner
-        returns (uint256)
+        onlyRole(ADMIN_ROLE)
     {
-        // Gets the draw.
-        Draw storage draw = _draws[_drawId];
-
-        // Reverts if the draw is not awarded yet.
-        require(isDrawAwarded(_drawId), DRAW_CLAIM_PRIZE__DRAW_NOT_AWARDED());
-        // Reverts if the user already claimed the prize.
-        require(!claimed[_drawId][_user], DRAW_CLAIM_PRIZE__ALREADY_CLAIMED());
-        // Reverts if maximum number of claims for the draw was already reached.
-        require(draw.claims < MAX_CLAIMS, DRAW_CLAIM_PRIZE__MAX_CLAIMS_REACHED());
-        // Reverts if user is not eligible.
-        require(isWinner(_drawId, _user, _userTwab, _poolTwab), DRAW_CLAIM_PRIZE__NOT_WINNER());
-
-        // Updates the number of claims and claimed status.
-        draw.claims += 1;
-        claimed[_drawId][_user] = true;
-        uint256 prize = draw.prize;
-
-        emit PrizeClaimed(_drawId, _user, prize, block.timestamp);
-
-        return prize;
-    }
-
-    /// @inheritdoc IDrawManager
-    function updateRequestConfig(uint32 _callbackGasLimit, uint16 _requestConfirmations) external onlyOwner {
         // Reverts if the callback gas limit is zero.
         require(_callbackGasLimit != 0, DRAW_REQUEST_CONFIG__INVALID_CALLBACK_GAS_LIMIT());
         // Reverts if the number of request confirmations is zero.
@@ -140,38 +107,15 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     /// @inheritdoc IDrawManager
-    function updateLuckFactor(uint256[] calldata _luckFactorList) external onlyOwner {
-        // Reverts if new luck factor list is empty.
-        require(_luckFactorList.length != 0, DRAW_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR_LIST());
+    function updateAdmin(address _admin) external onlyRole(ADMIN_ROLE) {
+        // Reverts if new admin address is the zero address or is equal to the current one.
+        require(_admin != address(0) && _admin != admin, DRAW_UPDATE_ADMIN__INVALID_ADMIN());
 
-        // Updates the luck factor list.
-        uint256[] memory oldLuckFactor = _luckFactor;
-        _luckFactor = _luckFactorList;
+        // Updates the admin address.
+        address oldAdmin = admin;
+        admin = _admin;
 
-        emit LuckFactorUpdated(oldLuckFactor, _luckFactorList, block.timestamp);
-    }
-
-    /// @inheritdoc IDrawManager
-    function isWinner(uint256 _drawId, address _user, uint256 _userTwab, uint256 _poolTwab)
-        public
-        view
-        returns (bool)
-    {
-        // Winner check is only possible for:
-        //      - Valid draw ids, meaning id > 0.
-        //      - Awarded or finalized draws.
-        if (_drawId == 0 || _drawId >= getCurrentOpenDrawId() || isDrawClosed(_drawId)) return false;
-
-        // Gets the random number of the draw.
-        uint256 drawRandomNumber = getRequest(getDraw(_drawId).requestId).randomNumber;
-        // Computes the user pseudo random number.
-        uint256 userPRN = uint256(keccak256(abi.encode(_drawId, drawRandomNumber, _user)));
-        // Gets the luck factor.
-        uint256 luckFactor = _luckFactor[UniformRandomNumber.uniform(userPRN, _luckFactor.length)];
-        // Computes the winning zone.
-        uint256 winningZone = (_userTwab * luckFactor) / ONE_HUNDRED_PERCENT_BPS;
-
-        return UniformRandomNumber.uniform(userPRN, _poolTwab) < winningZone;
+        emit AdminUpdated(oldAdmin, _admin, block.timestamp);
     }
 
     /// @inheritdoc IDrawManager
@@ -185,6 +129,11 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     /// @inheritdoc IDrawManager
+    function getDrawRandomNumber(uint256 _drawId) public view returns (uint256) {
+        return getRequest(drawToRequestId[_drawId]).randomNumber;
+    }
+
+    /// @inheritdoc IDrawManager
     function getRandomnessRequestCost() public view returns (uint256) {
         return i_vrfV2PlusWrapper.calculateRequestPrice(_requestConfig.callbackGasLimit, 1);
     }
@@ -195,19 +144,9 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
     }
 
     /// @inheritdoc IDrawManager
-    function getLuckFactor() public view returns (uint256[] memory) {
-        return _luckFactor;
-    }
-
-    /// @inheritdoc IDrawManager
     function getCurrentOpenDrawId() public view returns (uint256) {
         if (block.timestamp < GENESIS_START_TIME) return 1;
         return ((block.timestamp - GENESIS_START_TIME) / DRAW_DURATION) + 1;
-    }
-
-    /// @inheritdoc IDrawManager
-    function getDraw(uint256 _drawId) public view returns (Draw memory) {
-        return _draws[_drawId];
     }
 
     /// @inheritdoc IDrawManager
@@ -227,7 +166,7 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
         if (currentOpenDrawId < 2) return false;
 
         // Retrieves the randomness request status for the draw.
-        uint256 requestId = getDraw(_drawId).requestId;
+        uint256 requestId = drawToRequestId[_drawId];
         RequestStatus requestStatus = getRequest(requestId).status;
 
         // Draw is closed if it is the previous draw and hasn't been awarded yet.
@@ -241,7 +180,7 @@ contract DrawManager is IDrawManager, Ownable, VRFV2PlusWrapperConsumerBase {
         if (currentOpenDrawId < 2) return false;
 
         // Retrieves the randomness request status for the draw.
-        uint256 requestId = getDraw(_drawId).requestId;
+        uint256 requestId = drawToRequestId[_drawId];
         RequestStatus requestStatus = getRequest(requestId).status;
 
         // Draw is awarded if it is the previous draw and has been awarded.
