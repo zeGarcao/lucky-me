@@ -25,8 +25,6 @@ error POOL_DEPOSIT__INVALID_AMOUNT();
 error POOL_WITHDRAW__INVALID_AMOUNT();
 /// @notice Raised when the user's remaining balance is invalid after a withdrawal.
 error POOL_WITHDRAW__INVALID_BALANCE();
-/// @notice Raised when trying to set up a prize for a not closed draw.
-error POOL_PRIZE_SETUP__DRAW_NOT_CLOSED();
 /// @notice Raised when there is no sufficient funds to cover randomness request cost.
 error POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS();
 /// @notice Raised when the prize of the draw is too small.
