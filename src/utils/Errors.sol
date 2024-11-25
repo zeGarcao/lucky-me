@@ -26,9 +26,9 @@ error POOL_WITHDRAW__INVALID_AMOUNT();
 /// @notice Raised when the user's remaining balance is invalid after a withdrawal.
 error POOL_WITHDRAW__INVALID_BALANCE();
 /// @notice Raised when there is no sufficient funds to cover randomness request cost.
-error POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS();
+error POOL_SET_PRIZE__NOT_ENOUGH_FUNDS();
 /// @notice Raised when the prize of the draw is too small.
-error POOL_PRIZE_SETUP__PRIZE_TOO_SMALL();
+error POOL_SET_PRIZE__PRIZE_TOO_SMALL();
 /// @notice Raised when an invalid keeper is given when updating keeper.
 error POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS();
 /// @notice Raised when trying to claim prize which is not claimable yet.

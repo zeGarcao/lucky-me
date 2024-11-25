@@ -20,8 +20,8 @@ import {
     POOL_DEPOSIT__INVALID_AMOUNT,
     POOL_WITHDRAW__INVALID_AMOUNT,
     POOL_WITHDRAW__INVALID_BALANCE,
-    POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS,
-    POOL_PRIZE_SETUP__PRIZE_TOO_SMALL,
+    POOL_SET_PRIZE__NOT_ENOUGH_FUNDS,
+    POOL_SET_PRIZE__PRIZE_TOO_SMALL,
     POOL_UPDATE_KEEPER__INVALID_KEEPER_ADDRESS,
     POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR,
     POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE,
@@ -181,12 +181,12 @@ contract Pool is IPool, AccessControl {
         uint256 usdcAmountIn = _getUsdcAmountIn(randomnessRequestCost, _poolFee, _slippage);
 
         // Ensure there are enough funds to cover the cost of the randomness request.
-        require(yield > usdcAmountIn, POOL_PRIZE_SETUP__NOT_ENOUGH_FUNDS());
+        require(yield > usdcAmountIn, POOL_SET_PRIZE__NOT_ENOUGH_FUNDS());
 
         // Compute the prize for the draw.
         uint256 prize = (yield - usdcAmountIn) / MAX_CLAIMS;
         // Ensure there is a sufficient prize amount.
-        require(prize >= MIN_PRIZE, POOL_PRIZE_SETUP__PRIZE_TOO_SMALL());
+        require(prize >= MIN_PRIZE, POOL_SET_PRIZE__PRIZE_TOO_SMALL());
 
         // Withdraw USDC from Aave and decrease total supply in twab controller.
         TWAB_CONTROLLER.decreaseTotalSupply(usdcAmountIn);
