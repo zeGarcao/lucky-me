@@ -8,6 +8,6 @@ updateRequestConfig.t.sol
         ├── when new request confirmations is zero
         │   └── it should revert with {DRAW_REQUEST_CONFIG__INVALID_REQUEST_CONFIRMATIONS} error
         └── when new request confirmations is not zero
-            ├── it update callback gas limit of request config
-            ├── it update request confirmations of request config
-            └── it should emit the {RequestConfigUpdated} event
+            ├── it should update callback gas limit of request config
+            ├── it should update request confirmations of request config
+            └── it should emit the {AdminUpdated} event

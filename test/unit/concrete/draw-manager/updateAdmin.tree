@@ -1,0 +1,12 @@
+updateAdmin.t.sol
+├── when caller does not have `ADMIN_ROLE` role
+│   └── it should revert
+└── when caller has `ADMIN_ROLE` role
+    ├── when new admin is address zero
+    │   └── it should revert with {DRAW_UPDATE_ADMIN__INVALID_ADMIN} error
+    └── when new admin is not address zero
+        ├── when new admin is the same as the current admin address
+        │   └── it should revert with {DRAW_UPDATE_ADMIN__INVALID_ADMIN} error
+        └── when new admin is different from the current admin address
+            ├── it should update the admin address
+            └── it should emit the {RequestConfigUpdated} event
