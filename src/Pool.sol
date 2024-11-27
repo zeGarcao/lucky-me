@@ -163,8 +163,10 @@ contract Pool is IPool, AccessControl {
 
     /// @inheritdoc IPool
     function updateLuckFactor(uint256[] calldata _luckFactorArr) external onlyRole(OWNER_ROLE) {
+        // Reverts if new luck factor list is empty.
         require(_luckFactorArr.length != 0, POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR());
 
+        // Updates luck factor list.
         uint256[] memory oldLuckFactor = _luckFactor;
         _luckFactor = _luckFactorArr;
 

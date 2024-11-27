@@ -1,0 +1,9 @@
+updateLuckFactor.t.sol
+├── when caller does not have `OWNER_ROLE` role
+│   └── it should revert
+└── when caller has `OWNER_ROLE` role
+    ├── when new luck factor list is empty
+    │   └── it should revert with {POOL_UPDATE_LUCK_FACTOR__INVALID_LUCK_FACTOR} error
+    └── when new luck factor list is not empty
+        ├── it should update the luck factor list
+        └── it should emit the {LuckFactorUpdated} event
