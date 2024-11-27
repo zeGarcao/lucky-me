@@ -68,7 +68,7 @@ contract DrawManager is IDrawManager, AccessControl, VRFV2PlusWrapperConsumerBas
 
     /// @inheritdoc IDrawManager
     function awardDraw(uint256 _drawId) external onlyRole(OWNER_ROLE) {
-        // Reverts if draw is not closed
+        // Reverts if draw is not closed.
         require(isDrawClosed(_drawId), DRAW_AWARD_DRAW__DRAW_NOT_CLOSED());
 
         // Requests a random number from Chainlink.

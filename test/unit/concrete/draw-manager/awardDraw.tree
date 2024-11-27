@@ -1,0 +1,11 @@
+updateAdmin.t.sol
+├── when caller does not have `OWNER_ROLE` role
+│   └── it should revert
+└── when caller has `OWNER_ROLE` role
+    ├── when draw is not closed
+    │   └── it should revert with {DRAW_AWARD_DRAW__DRAW_NOT_CLOSED} error
+    └── when draw is closed
+        ├── it should call the {transferAndCall} function of LINK token contract
+        ├── it should assign the request id to the draw
+        ├── it should update randomness request status to pending
+        └── it should emit the {RandomnessRequestSent} event
