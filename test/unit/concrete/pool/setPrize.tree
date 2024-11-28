@@ -1,0 +1,26 @@
+setPrize.t.sol
+├── when caller does not have `KEEPER_ROLE` role
+│   └── it should revert
+└── when caller has `KEEPER_ROLE` role
+    ├── when generated yield is not enough to cover randomness costs
+    │   └── it should revert with {POOL_SET_PRIZE__NOT_ENOUGH_FUNDS} error
+    └── when generated yield is enough to cover randomness costs
+        ├── when prize is below {MIN_PRIZE}
+        │   └── it should revert with {POOL_SET_PRIZE__PRIZE_TOO_SMALL} error
+        └── when prize is equal or above {MIN_PRIZE}
+            ├── when there is a remaining balance after swap
+            │   ├── it should call the function {decreaseTotalSupply} of {TWAB_CONTROLLER} contract
+            │   ├── it should call the function {withdraw} of {AAVE_POOL} contract
+            │   ├── it should call the function {exactOutputSingle} of {SWAP_ROUTER} contract
+            │   ├── it should call the function {awardDraw} of {DRAW_MANAGER} contract
+            │   ├── it should call the function {increaseTotalSupply} of {TWAB_CONTROLLER} contract
+            │   ├── it should call the function {supply} of {AAVE_POOL} contract
+            │   ├── it should update the prize of the draw
+            │   └── it should emit the {PrizeSet} event
+            └── when there is not a remaining balance after swap
+                ├── it should call the function {decreaseTotalSupply} of {TWAB_CONTROLLER} contract
+                ├── it should call the function {withdraw} of {AAVE_POOL} contract
+                ├── it should call the function {exactOutputSingle} of {SWAP_ROUTER} contract
+                ├── it should call the function {awardDraw} of {DRAW_MANAGER} contract
+                ├── it should update the prize of the draw
+                └── it should emit the {PrizeSet} event
