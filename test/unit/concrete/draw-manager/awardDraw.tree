@@ -1,4 +1,4 @@
-updateAdmin.t.sol
+awardDraw.t.sol
 ├── when caller does not have `OWNER_ROLE` role
 │   └── it should revert
 └── when caller has `OWNER_ROLE` role

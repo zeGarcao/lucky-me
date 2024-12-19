@@ -258,8 +258,10 @@ contract Pool is IPool, AccessControl {
         uint256 luckFactor = _luckFactor[UniformRandomNumber.uniform(userPRN, _luckFactor.length)];
         // Computes the winning zone.
         uint256 winningZone = (userTwab * luckFactor) / ONE_HUNDRED_PERCENT_BPS;
+        // Computes user zone.
+        uint256 userZone = UniformRandomNumber.uniform(userPRN, poolTwab);
 
-        return UniformRandomNumber.uniform(userPRN, poolTwab) < winningZone;
+        return userZone < winningZone;
     }
 
     /// @inheritdoc IPool

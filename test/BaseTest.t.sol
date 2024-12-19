@@ -76,12 +76,30 @@ abstract contract BaseTest is Test {
         twabController = TwabController(pool.TWAB_CONTROLLER());
         drawManager = DrawManager(pool.DRAW_MANAGER());
 
-        // Set up user account with USDC
+        // Set up users account with USDC
         usdc.mint(bob, 1_000_000e6);
+        usdc.mint(rando, 1_000_000e6);
         vm.prank(bob);
+        usdc.approve(address(pool), 1_000_000e6);
+        vm.prank(rando);
         usdc.approve(address(pool), 1_000_000e6);
 
         // Set up swap router mock with LINK
         link.mint(address(swapRouter), 1_000_000e18);
+    }
+
+    function _awardDraw(uint256 _drawId) internal {
+        vm.prank(address(pool));
+        drawManager.awardDraw(_drawId);
+
+        _fulfillRandomWords();
+    }
+
+    function _fulfillRandomWords() internal {
+        uint256 requestId = vrfWrapper.lastRequestId();
+        uint256[] memory randomWords = new uint256[](1);
+        randomWords[0] = uint256(keccak256(abi.encode(requestId)));
+
+        vrfWrapper.fulfillRandomWords(address(drawManager), requestId, randomWords);
     }
 }
