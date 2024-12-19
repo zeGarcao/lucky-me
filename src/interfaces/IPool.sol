@@ -51,8 +51,9 @@ interface IPool {
 
     /**
      * @notice Handles the prize claiming process for the previous awarded draw.
+     * @return prizeAmount Prize amount received
      */
-    function claimPrize() external;
+    function claimPrize() external returns (uint256 prizeAmount);
 
     /**
      * @notice Checks if a user is eligible to win the prize for a specific draw.

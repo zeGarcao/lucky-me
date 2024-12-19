@@ -213,24 +213,24 @@ contract Pool is IPool, AccessControl {
     }
 
     /// @inheritdoc IPool
-    function claimPrize() external {
+    function claimPrize() external returns (uint256 prizeAmount) {
         // Retrieves the previous draw id and its corresponding prize.
         uint256 drawId = DRAW_MANAGER.getCurrentOpenDrawId() - 1;
         Prize storage prize = _prizes[drawId];
 
         // Reverts if draw is not awarded yet.
         require(DRAW_MANAGER.isDrawAwarded(drawId), POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE());
+        // Reverts if user is not eligible to claim the prize.
+        require(isWinner(drawId, msg.sender), POOL_CLAIM_PRIZE__NOT_ELIGIBLE());
         // Reverts if the user already claimed the prize.
         require(!claimed[drawId][msg.sender], POOL_CLAIM_PRIZE__ALREADY_CLAIMED());
         // Reverts if maximum number of claims was already reached.
         require(prize.claims < MAX_CLAIMS, POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED());
-        // Reverts if user is not eligible to claim the prize.
-        require(isWinner(drawId, msg.sender), POOL_CLAIM_PRIZE__NOT_ELIGIBLE());
 
         // Records that the user claimed the prize and increases the number of claims.
         claimed[drawId][msg.sender] = true;
         prize.claims += 1;
-        uint256 prizeAmount = prize.amount;
+        prizeAmount = prize.amount;
 
         // Credits the prize to the user's account.
         uint256 newBalance = TWAB_CONTROLLER.creditBalance(msg.sender, prizeAmount);

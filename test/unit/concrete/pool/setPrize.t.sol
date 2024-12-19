@@ -2,7 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Pool_Unit_Shared_Test} from "../../shared/Pool.t.sol";
-import {DRAW_DURATION, ONE_HUNDRED_PERCENT_BPS, MAX_CLAIMS} from "@lucky-me/utils/Constants.sol";
+import {DRAW_DURATION, MAX_CLAIMS} from "@lucky-me/utils/Constants.sol";
 import {POOL_SET_PRIZE__NOT_ENOUGH_FUNDS, POOL_SET_PRIZE__PRIZE_TOO_SMALL} from "@lucky-me/utils/Errors.sol";
 import {ISwapRouter} from "@lucky-me/interfaces/ISwapRouter.sol";
 import {PrizeSet} from "@lucky-me/utils/Events.sol";
@@ -180,12 +180,5 @@ contract SetPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
 
         // Asserting that the prize for the draw was updated.
         assertEq(pool.getDrawPrize(drawId).amount, prize);
-    }
-
-    function _getUsdcAmountIn(uint256 _linkAmountOut, uint24 _poolFee, uint256 _slippage) internal returns (uint256) {
-        uint256 usdcAmountIn =
-            quoter.quoteExactOutputSingle(address(usdc), drawManager.getLinkTokenAddress(), _poolFee, _linkAmountOut, 0);
-
-        return (usdcAmountIn * (ONE_HUNDRED_PERCENT_BPS + _slippage)) / ONE_HUNDRED_PERCENT_BPS;
     }
 }

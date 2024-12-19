@@ -8,3 +8,4 @@ isWinner.t.sol
         ├── when user PRN % pool twab is greater than or equal to winning zone
         │   └── it should return false
         └── when user PRN % pool twab is lower than winning zone
+            └── it should return true

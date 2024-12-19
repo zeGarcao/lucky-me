@@ -11,6 +11,7 @@ import {LinkMock} from "./mocks/LinkMock.sol";
 import {SwapRouterMock} from "./mocks/SwapRouterMock.sol";
 import {QuoterMock} from "./mocks/QuoterMock.sol";
 import {VRFWrapperMock} from "./mocks/VRFWrapperMock.sol";
+import {ONE_HUNDRED_PERCENT_BPS} from "@lucky-me/utils/Constants.sol";
 
 abstract contract BaseTest is Test {
     ERC20Mock usdc;
@@ -25,9 +26,13 @@ abstract contract BaseTest is Test {
     VRFWrapperMock vrfWrapper;
 
     address owner = makeAddr("owner");
+    address alice = makeAddr("alice");
+    address carol = makeAddr("carol");
     address bob = makeAddr("bob");
     address rando = makeAddr("rando");
     address keeper = makeAddr("keeper");
+
+    address[] users;
 
     function setUp() public virtual {
         // Skip 1 week in time
@@ -77,12 +82,16 @@ abstract contract BaseTest is Test {
         drawManager = DrawManager(pool.DRAW_MANAGER());
 
         // Set up users account with USDC
-        usdc.mint(bob, 1_000_000e6);
-        usdc.mint(rando, 1_000_000e6);
-        vm.prank(bob);
-        usdc.approve(address(pool), 1_000_000e6);
-        vm.prank(rando);
-        usdc.approve(address(pool), 1_000_000e6);
+        users.push(alice);
+        users.push(carol);
+        users.push(bob);
+        users.push(rando);
+        for (uint8 i; i < users.length; ++i) {
+            address user = users[i];
+            usdc.mint(user, 1_000_000e6);
+            vm.prank(user);
+            usdc.approve(address(pool), 1_000_000e6);
+        }
 
         // Set up swap router mock with LINK
         link.mint(address(swapRouter), 1_000_000e18);
@@ -101,5 +110,12 @@ abstract contract BaseTest is Test {
         randomWords[0] = uint256(keccak256(abi.encode(requestId)));
 
         vrfWrapper.fulfillRandomWords(address(drawManager), requestId, randomWords);
+    }
+
+    function _getUsdcAmountIn(uint256 _linkAmountOut, uint24 _poolFee, uint256 _slippage) internal returns (uint256) {
+        uint256 usdcAmountIn =
+            quoter.quoteExactOutputSingle(address(usdc), drawManager.getLinkTokenAddress(), _poolFee, _linkAmountOut, 0);
+
+        return (usdcAmountIn * (ONE_HUNDRED_PERCENT_BPS + _slippage)) / ONE_HUNDRED_PERCENT_BPS;
     }
 }
