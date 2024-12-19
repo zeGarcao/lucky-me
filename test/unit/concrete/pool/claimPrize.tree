@@ -2,15 +2,15 @@ claimPrize.t.sol
 ├── when draw is not awarded
 │   └── it should revert with {POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE} error
 └── when draw is awarded
-    ├── when user already claimed the prize
-    │   └── it should revert with {POOL_CLAIM_PRIZE__ALREADY_CLAIMED} error
-    └── when user did not claim the prize yet
-        ├── when maximum number of claims has already been reached
-        │   └── it should revert with {POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED} error
-        └── when number of claims below the maximum
-            ├── when user is not eligible to claim the prize
-            │   └── it should revert with {POOL_CLAIM_PRIZE__NOT_ELIGIBLE} error
-            └── when user is eligible to claim the prize
+    ├── when user is not eligible to claim the prize
+    │   └── it should revert with {POOL_CLAIM_PRIZE__NOT_ELIGIBLE} error
+    └── when user is eligible to claim the prize
+        ├── when user already claimed the prize
+        │   └── it should revert with {POOL_CLAIM_PRIZE__ALREADY_CLAIMED} error
+        └── when user did not claim the prize yet
+            ├── when maximum number of claims has already been reached
+            │   └── it should revert with {POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED} error
+            └── when number of claims below the maximum
                 ├── it should record that user claimed the prize
                 ├── it should increment the total number of prize claims
                 ├── it should call the {creditBalance} of the {TwabController} contract
