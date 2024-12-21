@@ -172,7 +172,7 @@ contract TwabController is ITwabController, Ownable {
      */
     function _getTwabBetween(AccountDetails memory _account, uint256 _startTime, uint256 _endTime)
         internal
-        view
+        pure
         returns (uint256)
     {
         // Reverts if start time is more recent than the end time.
