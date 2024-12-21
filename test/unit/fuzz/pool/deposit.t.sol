@@ -15,14 +15,14 @@ contract Deposit_Unit_Fuzz_Test is Pool_Unit_Shared_Test {
     }
 
     modifier whenDepositAmountAboveMin(uint256 _depositAmount) {
-        vm.startPrank(bob);
         depositAmount = _clampBetween(_depositAmount, MIN_DEPOSIT, usdc.balanceOf(bob));
+        vm.startPrank(bob);
         _;
     }
 
     // =================================== UNHAPPY TESTS ===================================
 
-    function test_RevertWhen_InvalidDepositAmount(uint256 _depositAmount)
+    function testFuzz_RevertWhen_InvalidDepositAmount(uint256 _depositAmount)
         public
         whenDepositAmountBelowMin(_depositAmount)
     {
@@ -33,7 +33,10 @@ contract Deposit_Unit_Fuzz_Test is Pool_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_Deposit_ValidDepositAmount(uint256 _depositAmount) public whenDepositAmountAboveMin(_depositAmount) {
+    function testFuzz_Deposit_ValidDepositAmount(uint256 _depositAmount)
+        public
+        whenDepositAmountAboveMin(_depositAmount)
+    {
         // Expect call to `twabController` to increase balance
         vm.expectCall(address(twabController), abi.encodeCall(twabController.increaseBalance, (bob, depositAmount)));
         // Expect call to `usdc` to transfer the assets from the caller to the pool contract
