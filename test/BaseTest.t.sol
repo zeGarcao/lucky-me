@@ -12,6 +12,7 @@ import {SwapRouterMock} from "./mocks/SwapRouterMock.sol";
 import {QuoterMock} from "./mocks/QuoterMock.sol";
 import {VRFWrapperMock} from "./mocks/VRFWrapperMock.sol";
 import {ONE_HUNDRED_PERCENT_BPS} from "@lucky-me/utils/Constants.sol";
+import {UniformRandomNumber} from "@lucky-me/libraries/UniformRandomNumber.sol";
 
 abstract contract BaseTest is Test {
     ERC20Mock usdc;
@@ -117,5 +118,9 @@ abstract contract BaseTest is Test {
             quoter.quoteExactOutputSingle(address(usdc), drawManager.getLinkTokenAddress(), _poolFee, _linkAmountOut, 0);
 
         return (usdcAmountIn * (ONE_HUNDRED_PERCENT_BPS + _slippage)) / ONE_HUNDRED_PERCENT_BPS;
+    }
+
+    function _clampBetween(uint256 _value, uint256 _min, uint256 _max) internal pure returns (uint256) {
+        return _min + UniformRandomNumber.uniform(_value, _max - _min);
     }
 }

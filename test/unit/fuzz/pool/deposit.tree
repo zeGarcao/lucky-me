@@ -1,0 +1,9 @@
+deposit.t.sol
+├── when deposited amount is lower than the minimum required
+│   └── it should revert with {POOL_DEPOSIT__INVALID_AMOUNT} Error
+└── when deposited amount is geater than or equals to the minimum required
+    ├── it should call the {increaseBalance} function of the {TwabController} contract   
+    ├── it should call the {transferFrom} function of the {USDC} contract   
+    ├── it should call the {approve} function of the {USDC} contract   
+    ├── it should call the {supply} function of the {AavePool} contract   
+    └── it should emit the {Deposited} event
