@@ -109,11 +109,13 @@ contract ClaimPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
     // =================================== UNHAPPY TESTS ===================================
 
     function test_RevertWhen_DrawNotAwarded() public whenDrawIsNotAwarded prankUser {
+        // Expect to revert with `POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE` error
         vm.expectRevert(POOL_CLAIM_PRIZE__PRIZE_NOT_CLAIMABLE.selector);
         pool.claimPrize();
     }
 
     function test_RevertWhen_NotEligible() public whenDrawIsAwarded whenUserIsNotEligible prankUser {
+        // Expect to revert with `POOL_CLAIM_PRIZE__NOT_ELIGIBLE` error
         vm.expectRevert(POOL_CLAIM_PRIZE__NOT_ELIGIBLE.selector);
         pool.claimPrize();
     }
@@ -125,6 +127,7 @@ contract ClaimPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenUserAlreadyClaimedPrize
         prankUser
     {
+        // Expect to revert with `POOL_CLAIM_PRIZE__ALREADY_CLAIMED` error
         vm.expectRevert(POOL_CLAIM_PRIZE__ALREADY_CLAIMED.selector);
         pool.claimPrize();
     }
@@ -137,6 +140,7 @@ contract ClaimPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenMaxClaimsReached
         prankUser
     {
+        // Expect to revert with `POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED` error
         vm.expectRevert(POOL_CLAIM_PRIZE__MAX_CLAIMS_REACHED.selector);
         pool.claimPrize();
     }

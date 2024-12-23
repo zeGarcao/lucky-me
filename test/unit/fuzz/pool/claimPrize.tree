@@ -1,0 +1,8 @@
+claimPrize.t.sol (draw awarded & claims < max claims & user didn't claim prize yet)
+├── when user is not eligible to claim the prize
+│   └── it should revert with {POOL_CLAIM_PRIZE__NOT_ELIGIBLE} error
+└── when user is eligible to claim the prize
+    ├── it should record that user claimed the prize
+    ├── it should increment the total number of prize claims
+    ├── it should call the {creditBalance} of the {TwabController} contract
+    └── it should emit the {PrizeClaimed} event
