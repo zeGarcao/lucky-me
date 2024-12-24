@@ -147,7 +147,7 @@ contract CreditBalance_Unit_Fuzz_Test is TwabController_Unit_Shared_Test {
         assertEq(accountAfter.observations[accountNewestIndexAfter].timestamp, block.timestamp);
     }
 
-    function test_CreditBalance_NotNewPeriodWithCardinalityBelowMax(
+    function testFuzz_CreditBalance_NotNewPeriodWithCardinalityBelowMax(
         uint256 _user,
         uint256 _increaseAmount,
         uint256 _cardinality,
@@ -201,7 +201,7 @@ contract CreditBalance_Unit_Fuzz_Test is TwabController_Unit_Shared_Test {
         assertEq(accountAfter.observations[accountNewestIndexAfter].timestamp, block.timestamp);
     }
 
-    function test_CreditBalance_NewPeriodWithMaxCardinality(uint256 _user, uint256 _increaseAmount, uint256 _skip)
+    function testFuzz_CreditBalance_NewPeriodWithMaxCardinality(uint256 _user, uint256 _increaseAmount, uint256 _skip)
         public
         setUpState(_user, _increaseAmount)
         whenMaxCardinality

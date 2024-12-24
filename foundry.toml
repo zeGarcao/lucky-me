@@ -8,6 +8,6 @@ solc = "0.8.27"
 line_length = 120
 
 [fuzz]
-runs = 16
+runs = 64
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
