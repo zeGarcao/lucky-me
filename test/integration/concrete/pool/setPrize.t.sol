@@ -2,10 +2,8 @@
 pragma solidity ^0.8.27;
 
 import {Pool_Integration_Shared_Test} from "../../shared/Pool.t.sol";
-import {DRAW_DURATION, MAX_CLAIMS} from "@lucky-me/utils/Constants.sol";
+import {DRAW_DURATION} from "@lucky-me/utils/Constants.sol";
 import {DRAW_AWARD_DRAW__DRAW_NOT_CLOSED} from "@lucky-me/utils/Errors.sol";
-import {ISwapRouter} from "@lucky-me/interfaces/ISwapRouter.sol";
-import {PrizeSet} from "@lucky-me/utils/Events.sol";
 import {RequestStatus} from "@lucky-me/utils/Enums.sol";
 
 contract SetPrize_Integration_Concrete_Test is Pool_Integration_Shared_Test {
