@@ -1,11 +1,14 @@
 isWinner.t.sol
-├── when draw is open
+├── when user has 0 balance
 │   └── it should return false
-└── when draw is not open
-    ├── when draw is closed
+└── when user has non-zero balance
+    ├── when draw is open
     │   └── it should return false
-    └── when draw is not closed
-        ├── when user PRN % pool twab is greater than or equal to winning zone
+    └── when draw is not open
+        ├── when draw is closed
         │   └── it should return false
-        └── when user PRN % pool twab is lower than winning zone
-            └── it should return true
+        └── when draw is not closed
+            ├── when user PRN % pool twab is greater than or equal to winning zone
+            │   └── it should return false
+            └── when user PRN % pool twab is lower than winning zone
+                └── it should return true

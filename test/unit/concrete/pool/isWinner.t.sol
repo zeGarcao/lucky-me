@@ -10,16 +10,24 @@ contract IsWinner_Unit_Concrete_Test is Pool_Unit_Shared_Test {
     function setUp() public override {
         Pool_Unit_Shared_Test.setUp();
 
-        vm.prank(bob);
-        pool.deposit(1_000e6);
-
         vm.prank(rando);
         pool.deposit(200e6);
-
-        skip(DRAW_DURATION);
     }
 
     // ================================== SETUP MODIFIERS ==================================
+
+    modifier whenUserHasZeroBalance() {
+        skip(DRAW_DURATION);
+        _;
+    }
+
+    modifier whenUserHasNonZeroBalance() {
+        vm.prank(bob);
+        pool.deposit(1_000e6);
+
+        skip(DRAW_DURATION);
+        _;
+    }
 
     modifier whenDrawIsOpen() {
         drawId = drawManager.getCurrentOpenDrawId();
@@ -78,7 +86,15 @@ contract IsWinner_Unit_Concrete_Test is Pool_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IsWinner_OpenDraw() public whenDrawIsOpen {
+    function test_IsWinner_ZeroBalance() public whenUserHasZeroBalance {
+        // Checking if Bob is the winner.
+        bool isWinner = pool.isWinner(drawId, bob);
+
+        // Asserting that Bob is not the winner since he has no balance.
+        assertFalse(isWinner);
+    }
+
+    function test_IsWinner_OpenDraw() public whenUserHasNonZeroBalance whenDrawIsOpen {
         // Checking if Bob is the winner.
         bool isWinner = pool.isWinner(drawId, bob);
 
@@ -86,7 +102,7 @@ contract IsWinner_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         assertFalse(isWinner);
     }
 
-    function test_IsWinner_ClosedDraw() public whenDrawIsNotOpen whenDrawIsClosed {
+    function test_IsWinner_ClosedDraw() public whenUserHasNonZeroBalance whenDrawIsNotOpen whenDrawIsClosed {
         // Checking if Bob is the winner.
         bool isWinner = pool.isWinner(drawId, bob);
 
@@ -96,6 +112,7 @@ contract IsWinner_Unit_Concrete_Test is Pool_Unit_Shared_Test {
 
     function test_IsWinner_NotWinner()
         public
+        whenUserHasNonZeroBalance
         whenDrawIsNotOpen
         whenDrawIsNotClosed
         whenUserPrnModPoolTwabGreaterOrEqualWinningZone
@@ -109,6 +126,7 @@ contract IsWinner_Unit_Concrete_Test is Pool_Unit_Shared_Test {
 
     function test_IsWinner_Winner()
         public
+        whenUserHasNonZeroBalance
         whenDrawIsNotOpen
         whenDrawIsNotClosed
         whenUserPrnModPoolTwabLowerThanWinningZone

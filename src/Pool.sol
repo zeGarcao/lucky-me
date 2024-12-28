@@ -240,11 +240,11 @@ contract Pool is IPool, AccessControl {
 
     /// @inheritdoc IPool
     function isWinner(uint256 _drawId, address _user) public view returns (bool) {
-        // No winner if draw is open or closed.
-        if (DRAW_MANAGER.isDrawOpen(_drawId) || DRAW_MANAGER.isDrawClosed(_drawId)) return false;
-
         // Not eligible if user has no balance.
         if (TWAB_CONTROLLER.getAccountBalance(_user) == 0) return false;
+
+        // No winner if draw is open or closed.
+        if (DRAW_MANAGER.isDrawOpen(_drawId) || DRAW_MANAGER.isDrawClosed(_drawId)) return false;
 
         // Retrieves the start and end times of the draw.
         (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);
