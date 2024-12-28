@@ -1,0 +1,3 @@
+claimPrize.t.sol (only happy paths)
+├── it should increase user's internal balance
+└── it should increase total supply

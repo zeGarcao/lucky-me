@@ -99,8 +99,6 @@ contract SetPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenThereIsRemainingBalanceAfterSwap
     {
         uint256 usdcAmountIn = _getUsdcAmountIn(drawManager.getRandomnessRequestCost(), POOL_FEE, SLIPPAGE);
-        // Expect call to `twabController` to decrease total supply.
-        vm.expectCall(address(twabController), abi.encodeCall(twabController.decreaseTotalSupply, (usdcAmountIn)));
         // Expect call to aave pool to withdraw funds.
         vm.expectCall(
             address(aavePool), abi.encodeCall(aavePool.withdraw, (address(usdc), usdcAmountIn, address(pool)))
@@ -119,10 +117,8 @@ contract SetPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         vm.expectCall(address(swapRouter), abi.encodeCall(swapRouter.exactOutputSingle, (swapParams)));
         // Expect call to `drawManager` to award the draw.
         vm.expectCall(address(drawManager), abi.encodeCall(drawManager.awardDraw, (drawId)));
-        // Expect call to `twabController` to increase supply with remaining balance after swap.
-        uint256 remainingAmount = usdcAmountIn - _getUsdcAmountIn(drawManager.getRandomnessRequestCost(), POOL_FEE, 0);
-        vm.expectCall(address(twabController), abi.encodeCall(twabController.increaseTotalSupply, (remainingAmount)));
         // Expect call to aave pool to supply the remaining balance after swap.
+        uint256 remainingAmount = usdcAmountIn - _getUsdcAmountIn(drawManager.getRandomnessRequestCost(), POOL_FEE, 0);
         vm.expectCall(
             address(aavePool), abi.encodeCall(aavePool.supply, (address(usdc), remainingAmount, address(pool), 0))
         );
@@ -148,8 +144,6 @@ contract SetPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         whenThereIsNoRemainingBalanceAfterSwap
     {
         uint256 usdcAmountIn = _getUsdcAmountIn(drawManager.getRandomnessRequestCost(), POOL_FEE, 0);
-        // Expect call to `twabController` to decrease total supply.
-        vm.expectCall(address(twabController), abi.encodeCall(twabController.decreaseTotalSupply, (usdcAmountIn)));
         // Expect call to aave pool to withdraw funds.
         vm.expectCall(
             address(aavePool), abi.encodeCall(aavePool.withdraw, (address(usdc), usdcAmountIn, address(pool)))

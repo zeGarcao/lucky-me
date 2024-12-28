@@ -3,14 +3,12 @@ setPrize.t.sol (caller == keeper & enough yield & valid prize)
 │   └── it should revert with {DRAW_AWARD_DRAW__DRAW_NOT_CLOSED} error
 └── when draw is closed
     ├── when there is a remaining balance after swap
-    │   ├── it should should decrease pool's total supply (and increase remaining)
     │   ├── it should should withdraw funds from Aave (and supply remaining)
     │   ├── it should should burn Aave receipt tokens (and mint remaining)
     │   ├── it should pay LINK tokens to Chainlink VRF wrapper contract for randomness request
     │   ├── it should store the randomness request id
     │   └── it should store the randomness request state
     └── when there is not a remaining balance after swap
-        ├── it should should decrease pool's total supply
         ├── it should should withdraw funds from Aave
         ├── it should should burn Aave receipt tokens
         ├── it should pay LINK tokens to Chainlink VRF wrapper contract for randomness request

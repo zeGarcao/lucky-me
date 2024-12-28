@@ -61,7 +61,6 @@ contract SetPrize_Integration_Concrete_Test is Pool_Integration_Shared_Test {
         // Get balances before setting prize
         uint256 requestCost = drawManager.getRandomnessRequestCost();
         uint256 usdcAmountIn = _getUsdcAmountIn(requestCost, POOL_FEE, slippage);
-        uint256 poolTotalSupplyBefore = twabController.getTotalSupply();
         uint256 aaveUsdcBalanceBefore = usdc.balanceOf(address(aavePool));
         uint256 aUsdcTotalSupplyBefore = aUsdc.balanceOf(address(pool));
         uint256 vrfWrapperLinkBalanceBefore = link.balanceOf(address(vrfWrapper));
@@ -69,8 +68,6 @@ contract SetPrize_Integration_Concrete_Test is Pool_Integration_Shared_Test {
         // Set prize
         pool.setPrize(drawId, POOL_FEE, slippage);
 
-        // Asserting that pool's total supply was updated
-        assertEq(twabController.getTotalSupply(), poolTotalSupplyBefore - usdcAmountIn);
         // Asserting that funds were withdrawn from Aave
         assertEq(usdc.balanceOf(address(aavePool)), aaveUsdcBalanceBefore - usdcAmountIn);
         // Asserting that pool's receipt tokens were burned
@@ -89,7 +86,6 @@ contract SetPrize_Integration_Concrete_Test is Pool_Integration_Shared_Test {
         uint256 requestCost = drawManager.getRandomnessRequestCost();
         uint256 usdcAmountIn = _getUsdcAmountIn(requestCost, POOL_FEE, slippage);
         uint256 remainingAmount = usdcAmountIn - _getUsdcAmountIn(requestCost, POOL_FEE, 0);
-        uint256 poolTotalSupplyBefore = twabController.getTotalSupply();
         uint256 aaveUsdcBalanceBefore = usdc.balanceOf(address(aavePool));
         uint256 aUsdcTotalSupplyBefore = aUsdc.balanceOf(address(pool));
         uint256 vrfWrapperLinkBalanceBefore = link.balanceOf(address(vrfWrapper));
@@ -97,8 +93,6 @@ contract SetPrize_Integration_Concrete_Test is Pool_Integration_Shared_Test {
         // Set prize
         pool.setPrize(drawId, POOL_FEE, slippage);
 
-        // Asserting that pool's total supply was updated
-        assertEq(twabController.getTotalSupply(), (poolTotalSupplyBefore - usdcAmountIn) + remainingAmount);
         // Asserting that funds were withdrawn from Aave
         assertEq(usdc.balanceOf(address(aavePool)), (aaveUsdcBalanceBefore - usdcAmountIn) + remainingAmount);
         // Asserting that pool's receipt tokens were burned
