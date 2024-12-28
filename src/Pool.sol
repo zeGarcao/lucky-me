@@ -233,7 +233,7 @@ contract Pool is IPool, AccessControl {
         prizeAmount = prize.amount;
 
         // Credits the prize to the user's account.
-        uint256 newBalance = TWAB_CONTROLLER.creditBalance(msg.sender, prizeAmount); // TODO change this to increase balance (credit balance is wrong)
+        uint256 newBalance = TWAB_CONTROLLER.increaseBalance(msg.sender, prizeAmount);
 
         emit PrizeClaimed(drawId, msg.sender, prizeAmount, newBalance, block.timestamp);
     }
@@ -243,7 +243,8 @@ contract Pool is IPool, AccessControl {
         // No winner if draw is open or closed.
         if (DRAW_MANAGER.isDrawOpen(_drawId) || DRAW_MANAGER.isDrawClosed(_drawId)) return false;
 
-        // TODO add check to verify zero balance
+        // Not eligible if user has no balance.
+        if (TWAB_CONTROLLER.getAccountBalance(_user) == 0) return false;
 
         // Retrieves the start and end times of the draw.
         (uint256 startTime, uint256 endTime) = DRAW_MANAGER.getDrawPeriod(_drawId);

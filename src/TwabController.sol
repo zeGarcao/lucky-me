@@ -9,8 +9,7 @@ import {
     BalanceDecreased,
     ObservationRecorded,
     TotalSupplyIncreased,
-    TotalSupplyDecreased,
-    BalanceCredited
+    TotalSupplyDecreased
 } from "@lucky-me/utils/Events.sol";
 import {MAX_CARDINALITY, PERIOD_LENGTH} from "@lucky-me/utils/Constants.sol";
 import {Observation, AccountDetails} from "@lucky-me/utils/Structs.sol";
@@ -23,8 +22,7 @@ import {
     TWAB_TWAB_BETWEEN__INSUFFICIENT_HISTORY,
     TWAB_INCREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
     TWAB_DECREASE_TOTAL_SUPPLY__INVALID_AMOUNT,
-    TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE,
-    TWAB_CREDIT_BALANCE__INVALID_AMOUNT
+    TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE
 } from "@lucky-me/utils/Errors.sol";
 
 // TODO documentation
@@ -121,21 +119,6 @@ contract TwabController is ITwabController, Ownable {
     }
 
     /// @inheritdoc ITwabController
-    function creditBalance(address _account, uint256 _amount) external onlyOwner returns (uint256) {
-        // Reverts if credit amount is zero.
-        require(_amount != 0, TWAB_CREDIT_BALANCE__INVALID_AMOUNT());
-
-        // Credits the user's account with `amount`.
-        (uint256 newBalance, Observation memory observation, bool isNewObservation) =
-            _increaseBalance(_accounts[_account], _amount);
-
-        emit BalanceCredited(_account, _amount, newBalance, block.timestamp);
-        emit ObservationRecorded(_account, observation, isNewObservation);
-
-        return newBalance;
-    }
-
-    /// @inheritdoc ITwabController
     function getTwabBetween(address _account, uint256 _startTime, uint256 _endTime) external view returns (uint256) {
         return _getTwabBetween(_accounts[_account], _startTime, _endTime);
     }
@@ -158,6 +141,11 @@ contract TwabController is ITwabController, Ownable {
     /// @inheritdoc ITwabController
     function getTotalSupply() public view returns (uint256) {
         return _totalSupplyAccount.balance;
+    }
+
+    /// @inheritdoc ITwabController
+    function getAccountBalance(address _account) public view returns (uint256) {
+        return _accounts[_account].balance;
     }
 
     /* ===================== Internal & Private Functions ===================== */

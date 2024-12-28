@@ -13,5 +13,5 @@ claimPrize.t.sol
             └── when number of claims below the maximum
                 ├── it should record that user claimed the prize
                 ├── it should increment the total number of prize claims
-                ├── it should call the {creditBalance} of the {TwabController} contract
+                ├── it should call the {increaseBalance} of the {TwabController} contract
                 └── it should emit the {PrizeClaimed} event

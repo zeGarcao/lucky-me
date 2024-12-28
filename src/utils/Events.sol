@@ -113,15 +113,6 @@ event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestam
 event PrizeClaimed(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
 
 /**
- * @notice Emitted whenever a prize is credited to a user's account.
- * @param account Address of the user.
- * @param amount Amount credited to user's account.
- * @param balance User's account balance after credit.
- * @param timestamp Timestamp when claiming took place.
- */
-event BalanceCredited(address account, uint256 amount, uint256 balance, uint256 timestamp);
-
-/**
  * @notice Emitted whenever the admin is updated.
  * @param oldAdmin Address of the old admin.
  * @param newAdmin Address of the new admin.

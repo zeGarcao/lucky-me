@@ -4,5 +4,5 @@ claimPrize.t.sol (draw awarded & claims < max claims & user didn't claim prize y
 └── when user is eligible to claim the prize
     ├── it should record that user claimed the prize
     ├── it should increment the total number of prize claims
-    ├── it should call the {creditBalance} of the {TwabController} contract
+    ├── it should call the {increaseBalance} of the {TwabController} contract
     └── it should emit the {PrizeClaimed} event

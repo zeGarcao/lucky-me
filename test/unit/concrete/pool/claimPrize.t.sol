@@ -160,7 +160,7 @@ contract ClaimPrize_Unit_Concrete_Test is Pool_Unit_Shared_Test {
         uint256 bobBalanceBefore = twabController.getAccount(bob).balance;
 
         // Expect call to `twabController` to credit prize
-        vm.expectCall(address(twabController), abi.encodeCall(twabController.creditBalance, (bob, prize)));
+        vm.expectCall(address(twabController), abi.encodeCall(twabController.increaseBalance, (bob, prize)));
         // Expect the `PrizeClaimed` event to be emitted
         vm.expectEmit(true, true, true, true);
         emit PrizeClaimed(drawId, bob, prize, bobBalanceBefore + prize, block.timestamp);

@@ -64,7 +64,7 @@ contract ClaimPrize_Unit_Fuzz_Test is Pool_Unit_Shared_Test {
         uint256 claimerBalanceBefore = twabController.getAccount(claimer).balance;
 
         // Expect call to `twabController` to credit prize
-        vm.expectCall(address(twabController), abi.encodeCall(twabController.creditBalance, (claimer, prize)));
+        vm.expectCall(address(twabController), abi.encodeCall(twabController.increaseBalance, (claimer, prize)));
         // Expect the `PrizeClaimed` event to be emitted
         vm.expectEmit(true, true, true, true);
         emit PrizeClaimed(drawId, claimer, prize, claimerBalanceBefore + prize, block.timestamp);
