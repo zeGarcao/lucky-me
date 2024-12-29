@@ -1,0 +1,5 @@
+deposit.t.sol (only happy paths)
+├── it should increase the internal balance of the user
+├── it should increase the pool total supply
+├── it should supply the assets to Aave pool
+└── it should transfer the corresponding Aave receipt tokens to the pool
