@@ -1,0 +1,8 @@
+withdraw.t.sol (amount != 0 && valid new balance)
+├── when amount is greater than user balance
+│   └── it should revert with {TWAB_DECREASE_BALANCE__INSUFFICIENT_BALANCE} Error
+└── when amount is not greater than user balance
+    ├── it should decrease user's internal balance
+    ├── it should decrease pool's total supply
+    ├── it should burn the corresponding pool's receipt tokens
+    └── it should transfer back the assets to the user

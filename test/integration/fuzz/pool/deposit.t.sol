@@ -14,7 +14,10 @@ contract Deposit_Integration_Fuzz_Test is Pool_Integration_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_Deposit_ValidDepositAmount(uint256 _depositAmount) public whenDepositAmountAboveMin(_depositAmount) {
+    function testFuzz_Deposit_ValidDepositAmount(uint256 _depositAmount)
+        public
+        whenDepositAmountAboveMin(_depositAmount)
+    {
         // Get balances before pool deposit
         uint256 bobInternalBalanceBefore = twabController.getAccount(bob).balance;
         uint256 poolTotalSupplyBefore = twabController.getTotalSupply();
