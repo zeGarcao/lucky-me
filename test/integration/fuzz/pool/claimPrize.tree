@@ -1,0 +1,6 @@
+claimPrize.t.sol (win vs lose)
+├── when user is not an eligible winner
+│   └── it should revert with {POOL_CLAIM_PRIZE__NOT_ELIGIBLE} error
+└── when user is an eligible winner
+    ├── it should increase user's internal balance
+    └── it should increase total supply
