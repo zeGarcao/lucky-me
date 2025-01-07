@@ -1,3 +1,1 @@
 # Lucky Me 🍀
-
-Currently under development...
