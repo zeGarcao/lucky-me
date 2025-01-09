@@ -1,0 +1,4 @@
+withdraw.t.sol (only happy paths)
+├── it should increase user's USDC balance
+├── it should withdraw USDC from Aave
+└── it should burn pool's aUSDC

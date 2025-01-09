@@ -27,8 +27,8 @@ contract Deposit_Fork_Concrete_Test is Pool_Fork_Shared_Test {
         // Asserting that bob's balance was updated
         assertEq(USDC.balanceOf(bob), bobUsdcBalanceBefore - depositAmount);
         // Asserting that bob's funds were supplied to Aave
-        // assertEq(USDC.balanceOf(address(A_USDC)), aaveUsdcBalanceBefore + depositAmount);
+        assertEq(USDC.balanceOf(address(A_USDC)), aaveUsdcBalanceBefore + depositAmount);
         // Asserting that aUsdc was minted to the pool
-        // assertEq(A_USDC.balanceOf(address(pool)), poolAUsdcBalanceBefore + poolAUsdcBalanceBefore);
+        assertEq(A_USDC.balanceOf(address(pool)), poolAUsdcBalanceBefore + depositAmount);
     }
 }

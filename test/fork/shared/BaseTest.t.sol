@@ -16,7 +16,7 @@ abstract contract BaseTest is Test {
 
     // external tokens
     IERC20 constant USDC = IERC20(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-    IERC20 constant A_USDC = IERC20(0xBcca60bB61934080951369a648Fb03DF4F96263C);
+    IERC20 constant A_USDC = IERC20(0x98C23E9d8f34FEFb1B7BD6a91B7FF122F4e16F5c);
     IERC20 constant LINK = IERC20(0x514910771AF9Ca656af840dff83E8264EcF986CA);
 
     // external protocols
