@@ -1,0 +1,4 @@
+deposit.t.sol (only happy path)
+├── it should decrease the user's USDC balance   
+├── it should supply the USDC amount to Aave
+└── it should mint aUSDC tokens to the pool

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.27;
 
 import {Test} from "forge-std/Test.sol";
+import {StdUtils} from "forge-std/StdUtils.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAavePool} from "@lucky-me/interfaces/IAavePool.sol";
 import {ISwapRouter} from "@lucky-me/interfaces/ISwapRouter.sol";
@@ -32,6 +33,7 @@ abstract contract BaseTest is Test {
     // actors
     address owner = makeAddr("owner");
     address keeper = makeAddr("keeper");
+    address bob = makeAddr("bob");
 
     function setUp() public virtual {
         // fork ethereum mainnet
@@ -71,6 +73,9 @@ abstract contract BaseTest is Test {
         twabController = TwabController(pool.TWAB_CONTROLLER());
         drawManager = DrawManager(pool.DRAW_MANAGER());
 
-        // TODO set up users
+        // Set up actors' funds
+        deal(address(USDC), bob, 1_000_000e6, true);
+        vm.prank(bob);
+        USDC.approve(address(pool), 1_000_000e6);
     }
 }
