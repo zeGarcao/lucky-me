@@ -1,0 +1,11 @@
+setPrize.t.sol (only happy paths)
+├── when there is not a remaining balance after swap
+│   ├── it should withdraw from Aave the necessary USDC amount to pay chainlink VRF
+│   ├── it should burn the correct amount of aUSDC tokens from Pool contract
+│   └── it should transfer out LINK tokens from DrawManager to pay chainlink VRF
+└── when there is a remaining balance after swap
+    ├── it should withdraw from Aave the necessary USDC amount to pay chainlink VRF
+    ├── it should burn the correct amount of aUSDC tokens from Pool contract
+    ├── it should supply the remaining USDC amount to Aave
+    ├── it should mint aUSDC tokens to Pool contract as a receipt from remaining USDC supplied
+    └── it should transfer out LINK tokens from DrawManager to pay chainlink VRF
