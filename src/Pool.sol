@@ -43,7 +43,14 @@ import {
 import {UniformRandomNumber} from "@lucky-me/libraries/UniformRandomNumber.sol";
 import {Prize} from "@lucky-me/utils/Structs.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me Pool
+ * @author José Garção
+ * @notice The Pool contract is the main entry point of the system, responsible for:
+ *  - Deposits and withdrawals
+ *  - Core functionality updates
+ *  - Prize claims
+ */
 contract Pool is IPool, AccessControl {
     /// @notice Instance of TwabController responsible for managing balances.
     TwabController public immutable TWAB_CONTROLLER;
@@ -72,7 +79,18 @@ contract Pool is IPool, AccessControl {
 
     /* ===================== Constructor ===================== */
 
-    // TODO documentation
+    /**
+     * @notice Pool's constructor.
+     * @param _usdcAddress Address of USDC token.
+     * @param _aavePoolAddress Address of Aave pool.
+     * @param _aUsdcAddress Address of aUSDC token.
+     * @param _keeperAddress Address of the protocol's keeper.
+     * @param _vrfWrapperAddress Address of Chainlink's VRF wrapper contract.
+     * @param _swapRouterAddress Address of Uniswap V3's swap router contract.
+     * @param _quoterAddress Address of Uniswap V3's quoter contract.
+     * @param _startTime Start timestamp of the first draw.
+     * @param _luckFactorAArr List of luck values for computing winner eligibility.
+     */
     constructor(
         address _usdcAddress,
         address _aavePoolAddress,

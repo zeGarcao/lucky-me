@@ -29,7 +29,13 @@ import {
 import {VRFV2PlusWrapperConsumerBase} from "@chainlink/vrf/dev/VRFV2PlusWrapperConsumerBase.sol";
 import {VRFV2PlusClient} from "@chainlink/vrf/dev/libraries/VRFV2PlusClient.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me DrawManager
+ * @author José Garção
+ * @notice The DrawManager contract is the module responsible for:
+ *  - Draw management
+ *  - Randomness generation through Chainlink VRF
+ */
 contract DrawManager is IDrawManager, AccessControl, VRFV2PlusWrapperConsumerBase {
     /// @notice Genesis draw start time.
     uint256 public immutable GENESIS_START_TIME;
@@ -47,7 +53,12 @@ contract DrawManager is IDrawManager, AccessControl, VRFV2PlusWrapperConsumerBas
 
     /* ===================== Constructor ===================== */
 
-    // TODO documentation
+    /**
+     * @notice DrawManager's constructor.
+     * @param _genesisStartTime Start timestamp of the first draw.
+     * @param _wrapperAddress Address of Chainlink's VRF wrapper contract.
+     * @param _admin Address of the contract's admin.
+     */
     constructor(uint256 _genesisStartTime, address _wrapperAddress, address _admin)
         VRFV2PlusWrapperConsumerBase(_wrapperAddress)
     {

@@ -3,7 +3,10 @@ pragma solidity ^0.8.27;
 
 import {AccountDetails} from "@lucky-me/utils/Structs.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me TwabController interface
+ * @notice Interface for Lucky Me TwabController
+ */
 interface ITwabController {
     /**
      * @notice Increases a user's account balance and records the corresponding observation.

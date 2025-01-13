@@ -25,7 +25,12 @@ import {
     TWAB_DECREASE_TOTAL_SUPPLY__INSUFFICIENT_BALANCE
 } from "@lucky-me/utils/Errors.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me TwabController
+ * @author José Garção
+ * @notice The TwabController contract is the module responsible for:
+ *  - Users' balances management
+ */
 contract TwabController is ITwabController, Ownable {
     /// @notice Time offset of the first period.
     uint256 public immutable PERIOD_OFFSET;
@@ -37,7 +42,10 @@ contract TwabController is ITwabController, Ownable {
 
     /* ===================== Constructor ===================== */
 
-    // TODO documentation
+    /**
+     * @notice TwabController's constructor.
+     * @param _periodOffset Time offset of the first period.
+     */
     constructor(uint256 _periodOffset) Ownable(msg.sender) {
         require(_periodOffset >= block.timestamp, TWAB_INIT__INVALID_PERIOD_OFFSET());
         PERIOD_OFFSET = _periodOffset;

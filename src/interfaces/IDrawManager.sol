@@ -3,7 +3,10 @@ pragma solidity ^0.8.27;
 
 import {Request, RequestConfig} from "@lucky-me/utils/Structs.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me DrawManager interface
+ * @notice Interface for Lucky Me DrawManager
+ */
 interface IDrawManager {
     /**
      * @notice Awards a draw with a random number.

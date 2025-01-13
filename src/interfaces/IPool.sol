@@ -9,7 +9,10 @@ import {ISwapRouter} from "@lucky-me/interfaces/ISwapRouter.sol";
 import {IQuoter} from "@lucky-me/interfaces/IQuoter.sol";
 import {Prize} from "@lucky-me/utils/Structs.sol";
 
-// TODO documentation
+/**
+ * @title Lucky Me Pool interface
+ * @notice Interface for Lucky Me Pool
+ */
 interface IPool {
     /**
      * @notice Deposits USDC into the pool.
