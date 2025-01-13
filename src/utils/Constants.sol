@@ -12,7 +12,7 @@ uint256 constant DRAW_DURATION = 1 weeks;
 // Minimum prize of each draw.
 uint256 constant MIN_PRIZE = 100e6;
 // Randomness request default configuration for callback gas limit.
-uint32 constant DEFAULT_CALLBACK_GAS_LIMIT = 100000; // TODO test callback function to determine its gas cost
+uint32 constant DEFAULT_CALLBACK_GAS_LIMIT = 100000;
 // Randomness request default configuration for number of request confirmations.
 uint16 constant DEFAULT_REQUEST_CONFIRMATIONS = 3;
 // Owner role used for access control, keccak256 of "OWNER_ROLE" string.

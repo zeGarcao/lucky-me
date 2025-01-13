@@ -89,7 +89,7 @@ contract Pool is IPool, AccessControl {
      * @param _swapRouterAddress Address of Uniswap V3's swap router contract.
      * @param _quoterAddress Address of Uniswap V3's quoter contract.
      * @param _startTime Start timestamp of the first draw.
-     * @param _luckFactorAArr List of luck values for computing winner eligibility.
+     * @param _luckFactorArr List of luck values for computing winner eligibility.
      */
     constructor(
         address _usdcAddress,
