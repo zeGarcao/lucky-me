@@ -1,4 +1,3 @@
-// TODO change this to a submodule of project
 /**
  * Copyright 2019 PoolTogether LLC
  *
