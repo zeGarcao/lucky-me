@@ -113,7 +113,11 @@ abstract contract BaseTest is Test {
         vrfWrapper.fulfillRandomWords(address(drawManager), requestId, randomWords);
     }
 
-    function _getUsdcAmountIn(uint256 _linkAmountOut, uint24 _poolFee, uint256 _slippage) internal returns (uint256) {
+    function _getUsdcAmountIn(uint256 _linkAmountOut, uint24 _poolFee, uint256 _slippage)
+        internal
+        view
+        returns (uint256)
+    {
         uint256 usdcAmountIn =
             quoter.quoteExactOutputSingle(address(usdc), drawManager.getLinkTokenAddress(), _poolFee, _linkAmountOut, 0);
 

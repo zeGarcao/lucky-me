@@ -12,6 +12,7 @@ contract QuoterMock is IQuoter {
     // hardcoded functionality for LINK/USDC pair
     function quoteExactOutputSingle(address, address, uint24, uint256 amountOut, uint160)
         external
+        pure
         returns (uint256 amountIn)
     {
         uint256 amountInWithoutFee = (amountOut * QUOTE) / 1e18;

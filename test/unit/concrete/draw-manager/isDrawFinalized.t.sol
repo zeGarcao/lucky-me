@@ -28,7 +28,7 @@ contract IsDrawFinalized_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IsDrawFinalized_NoFinalizedDraws() public whenCurrentOpenDrawIdBelow3 {
+    function test_IsDrawFinalized_NoFinalizedDraws() public view whenCurrentOpenDrawIdBelow3 {
         assertFalse(drawManager.isDrawFinalized(drawId));
     }
 

@@ -28,17 +28,17 @@ contract VRFWrapperMock is IVRFV2PlusWrapper {
         _price = _newPrice;
     }
 
-    function calculateRequestPriceNative(uint32, uint32) external view returns (uint256) {
+    function calculateRequestPriceNative(uint32, uint32) external pure returns (uint256) {
         /* Not necessary */
         return 0;
     }
 
-    function estimateRequestPrice(uint32, uint32, uint256) external view returns (uint256) {
+    function estimateRequestPrice(uint32, uint32, uint256) external pure returns (uint256) {
         /* Not necessary */
         return 0;
     }
 
-    function estimateRequestPriceNative(uint32, uint32, uint256) external view returns (uint256) {
+    function estimateRequestPriceNative(uint32, uint32, uint256) external pure returns (uint256) {
         /* Not necessary */
         return 0;
     }
@@ -56,7 +56,7 @@ contract VRFWrapperMock is IVRFV2PlusWrapper {
         return LINK;
     }
 
-    function linkNativeFeed() external view returns (address) {
+    function linkNativeFeed() external pure returns (address) {
         /* Not necessary */
         return address(0);
     }

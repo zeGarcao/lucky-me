@@ -37,7 +37,7 @@ contract IsDrawAwarded_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IsDrawAwarded_NoAwardedDraws() public whenCurrentOpenDrawIdBelow2 {
+    function test_IsDrawAwarded_NoAwardedDraws() public view whenCurrentOpenDrawIdBelow2 {
         assertFalse(drawManager.isDrawAwarded(drawId));
     }
 

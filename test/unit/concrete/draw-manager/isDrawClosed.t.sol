@@ -37,7 +37,7 @@ contract IsDrawClosed_Unit_Concrete_Test is DrawManager_Unit_Shared_Test {
 
     // ==================================== HAPPY TESTS ====================================
 
-    function test_IsDrawClosed_NoClosedDraws() public whenCurrentOpenDrawIdBelow2 {
+    function test_IsDrawClosed_NoClosedDraws() public view whenCurrentOpenDrawIdBelow2 {
         assertFalse(drawManager.isDrawClosed(drawId));
     }
 
