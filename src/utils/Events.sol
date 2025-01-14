@@ -3,6 +3,8 @@ pragma solidity ^0.8.27;
 
 import {Observation} from "@lucky-me/utils/Structs.sol";
 
+/* ===================================== POOL EVENTS ==================================== */
+
 /**
  * @notice Emitted whenever a user successfully deposited into the pool.
  * @param account Address of the user who deposited into the pool.
@@ -20,6 +22,42 @@ event Deposited(address indexed account, uint256 amount, uint256 balance, uint25
  * @param timestamp Timestamp when the withdrawal took place.
  */
 event Withdrawn(address indexed account, uint256 amount, uint256 balance, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is set up for a draw.
+ * @param drawId Id of the draw.
+ * @param prize Prize assigned to the draw.
+ * @param timestamp Timestamp of prize setup.
+ */
+event PrizeSet(uint256 indexed drawId, uint256 prize, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the keeper is updated.
+ * @param newKeeper Address of the new keeper.
+ * @param oldKeeper Address of the old keeper.
+ * @param timestamp Timestamp of the update.
+ */
+event KeeperUpdated(address indexed newKeeper, address indexed oldKeeper, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever a prize is successfully awarded to a user.
+ * @param drawId Id of the draw.
+ * @param winner Address of the winner.
+ * @param prize Prize awarded.
+ * @param balance User balance upon receiving the prize.
+ * @param timestamp Timestamp when claiming took place.
+ */
+event PrizeClaimed(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever the luck factor list is updated.
+ * @param oldLuckFactor Old luck factor list.
+ * @param newLuckFactor New luck factor list.
+ * @param timestamp Timestamp of the update.
+ */
+event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);
+
+/* ===================================== TWAB EVENTS ==================================== */
 
 /**
  * @notice Emitted whenever a user account balance is successfully increased.
@@ -48,6 +86,24 @@ event BalanceDecreased(address indexed account, uint256 amount, uint256 balance,
 event ObservationRecorded(address indexed account, Observation observation, bool isNew);
 
 /**
+ * @notice Emitted whenever total supply balance is successfully increased.
+ * @param amount Amount the total supply balance increased by.
+ * @param totalSupply Total supply balance after increase.
+ * @param timestamp Timestamp when the increase took place.
+ */
+event TotalSupplyIncreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
+
+/**
+ * @notice Emitted whenever total supply balance is successfully decreased.
+ * @param amount Amount the total supply balance decreased by.
+ * @param totalSupply Total supply balance after decrease.
+ * @param timestamp Timestamp when the decrease took place.
+ */
+event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
+
+/* ===================================== DRAW MANAGER EVENTS ==================================== */
+
+/**
  * @notice Emitted whenever a randomness request is sent.
  * @param requestId Id of the request.
  * @param drawId Id of the draw.
@@ -71,59 +127,9 @@ event RandomnessRequestFulFilled(uint256 indexed requestId, uint256 timestamp);
 event RequestConfigUpdated(uint32 callbackGasLimit, uint16 requestConfirmations, uint256 timestamp);
 
 /**
- * @notice Emitted whenever a prize is set up for a draw.
- * @param drawId Id of the draw.
- * @param prize Prize assigned to the draw.
- * @param timestamp Timestamp of prize setup.
- */
-event PrizeSet(uint256 indexed drawId, uint256 prize, uint256 timestamp);
-
-/**
- * @notice Emitted whenever the keeper is updated.
- * @param newKeeper Address of the new keeper.
- * @param oldKeeper Address of the old keeper.
- * @param timestamp Timestamp of the update.
- */
-event KeeperUpdated(address indexed newKeeper, address indexed oldKeeper, uint256 timestamp);
-
-/**
- * @notice Emitted whenever total supply balance is successfully increased.
- * @param amount Amount the total supply balance increased by.
- * @param totalSupply Total supply balance after increase.
- * @param timestamp Timestamp when the increase took place.
- */
-event TotalSupplyIncreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
-
-/**
- * @notice Emitted whenever total supply balance is successfully decreased.
- * @param amount Amount the total supply balance decreased by.
- * @param totalSupply Total supply balance after decrease.
- * @param timestamp Timestamp when the decrease took place.
- */
-event TotalSupplyDecreased(uint256 amount, uint256 totalSupply, uint256 timestamp);
-
-/**
- * @notice Emitted whenever a prize is successfully awarded to a user.
- * @param drawId Id of the draw.
- * @param winner Address of the winner.
- * @param prize Prize awarded.
- * @param balance User balance upon receiving the prize.
- * @param timestamp Timestamp when claiming took place.
- */
-event PrizeClaimed(uint256 drawId, address winner, uint256 prize, uint256 balance, uint256 timestamp);
-
-/**
  * @notice Emitted whenever the admin is updated.
  * @param oldAdmin Address of the old admin.
  * @param newAdmin Address of the new admin.
  * @param timestamp Timestamp of the update.
  */
 event AdminUpdated(address oldAdmin, address newAdmin, uint256 timestamp);
-
-/**
- * @notice Emitted whenever the luck factor list is updated.
- * @param oldLuckFactor Old luck factor list.
- * @param newLuckFactor New luck factor list.
- * @param timestamp Timestamp of the update.
- */
-event LuckFactorUpdated(uint256[] oldLuckFactor, uint256[] newLuckFactor, uint256 timestamp);
